@@ -1,0 +1,3 @@
+[submodule "Assets/MornLib"]
+	path = Assets/MornLib
+	url = git@github.com:matsufriends/MornLib.git
