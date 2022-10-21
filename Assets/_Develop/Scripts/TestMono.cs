@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cell;
 using Cysharp.Threading.Tasks;
 using Field;
 using MornLib.Extensions;
 using UnityEngine;
 public class TestMono : MonoBehaviour {
-    [SerializeField] private float _duration = 0.1f;
+    [SerializeField] private int _frame = 2;
     private FieldPresenter _presenter;
     private CellColor _curColor;
     private readonly List<Vector2Int> _canPutPosList = new();
     private readonly List<Vector2Int> _forProcess = new();
+    private static readonly Vector2Int s_size = new(20,20);
     private void Awake() {
-        _presenter = new FieldPresenter(new Vector2Int(100,100),transform.position);
-        _curColor  = CellColor.Black;
+        ResetGame();
         Loop().Forget();
+    }
+    private void ResetGame() {
+        _presenter = new FieldPresenter(s_size,transform.position + new Vector3(0.5f - s_size.x / 2f,0,0.5f - s_size.y / 2f));
+        _curColor  = CellColor.Black;
     }
     private async UniTask Loop() {
         while(true) {
@@ -27,12 +30,11 @@ public class TestMono : MonoBehaviour {
                     CalculateCanPut();
                     if(_canPutPosList.Count == 0) {
                         _presenter.Dispose();
-                        _presenter = new FieldPresenter(new Vector2Int(8,8),transform.position);
-                        _curColor  = CellColor.Black;
+                        ResetGame();
                     }
                 }
             }
-            await UniTask.Delay(TimeSpan.FromSeconds(_duration));
+            await UniTask.DelayFrame(_frame);
         }
     }
     private void CalculateCanPut() {
