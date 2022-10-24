@@ -16,7 +16,7 @@ namespace Cell {
         }
         private async UniTask InitAsync(Vector3 offset,CellUpdateInfo updateInfo) {
             var rand = new Vector3(UnityEngine.Random.Range(-c_diff,c_diff),0,UnityEngine.Random.Range(-c_diff,c_diff));
-            transform.position    = offset + new Vector3(updateInfo.Pos.x,0,updateInfo.Pos.y) + rand;
+            transform.position    = offset + new Vector3(updateInfo.Pos.x,0,-updateInfo.Pos.y) + rand;
             transform.eulerAngles = CellColorToEulerAngles(updateInfo.CellColor);
         }
         private async UniTask SetAsync(Vector3 offset,CellUpdateInfo updateInfo) {

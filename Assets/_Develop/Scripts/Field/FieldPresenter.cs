@@ -23,11 +23,14 @@ namespace Field {
         public bool TryGetCell(Vector2Int pos,out CellColor cellColor) {
             return _fieldModel.TryGetCell(pos,out cellColor);
         }
-        public bool TryPut(Vector2Int putPos,CellColor putColor) {
-            return _fieldModel.TryPut(putPos,putColor);
+        public bool TryGetCanPutPosses(CellColor putColor,List<Vector2Int> canPutPosList) {
+            return _fieldModel.TryGetCanPutPosses(putColor,canPutPosList);
         }
         public bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList) {
             return _fieldModel.TryGetFlipPosses(putPos,putColor,flipPosList);
+        }
+        public bool TryPut(Vector2Int putPos,CellColor putColor) {
+            return _fieldModel.TryPut(putPos,putColor);
         }
     }
 }

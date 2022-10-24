@@ -59,9 +59,24 @@ namespace Field {
             }
             return true;
         }
+        public bool TryGetCanPutPosses(CellColor putColor,List<Vector2Int> canPutPosList) {
+            canPutPosList.Clear();
+            for(var y = 0;y < Size.x;y++) {
+                for(var x = 0;x < Size.x;x++) {
+                    var checkPos = new Vector2Int(x,y);
+                    if(TryGetFlipPosses(checkPos,putColor,null,true)) {
+                        canPutPosList.Add(checkPos);
+                    }
+                }
+            }
+            return canPutPosList.Count > 0;
+        }
         public bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList) {
             if(flipPosList == null) return false;
             flipPosList.Clear();
+            return TryGetFlipPosses(putPos,putColor,flipPosList,false);
+        }
+        private bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList,bool checkCanPutOnly) {
             if(TryGetCell(putPos,out var cellColor) == false || cellColor != CellColor.None) {
                 return false;
             }
@@ -73,12 +88,13 @@ namespace Field {
                         hasOpposite = true;
                     } else if(putColor == checkCellColor) {
                         if(hasOpposite == false) break;
+                        if(checkCanPutOnly) return true;
                         for(var i = 1;i < dirLen;i++) flipPosList.Add(putPos + dir * i);
                         break;
                     } else break;
                 }
             }
-            return flipPosList.Count > 0;
+            return checkCanPutOnly == false && flipPosList.Count > 0;
         }
         public void Dispose() {
             _updateCellSubject?.Dispose();

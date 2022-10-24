@@ -1,33 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cell;
-using Cysharp.Threading.Tasks;
+using Marker;
 using MornLib.Extensions;
 using UnityEngine;
 namespace Field {
     public class FieldMono : MonoBehaviour {
+        [SerializeField] private LayerMask _fieldLayerMask;
+        [SerializeField] private Transform _markerParent;
         private FieldPresenter _presenter;
         private CellColor _curColor;
-        private readonly List<Vector2Int> _canPutPosList = new();
+        private Vector3 _offset;
         private readonly List<Vector2Int> _forProcess = new();
         private static readonly Vector2Int s_size = new(20,20);
         private void Awake() {
             ResetGame();
-            Loop().Forget();
+            ShowCanPutMarker();
         }
         private void ResetGame() {
-            _presenter = new FieldPresenter(s_size,transform.position + new Vector3(0.5f - s_size.x / 2f,0,0.5f - s_size.y / 2f));
+            _offset    = transform.position + new Vector3(0.5f - s_size.x / 2f,0,0.5f + s_size.y / 2f);
+            _presenter = new FieldPresenter(s_size,_offset);
             _curColor  = CellColor.Black;
         }
+        private void ShowCanPutMarker() {
+            _markerParent.DestroyChildren();
+            var list = new List<Vector2Int>();
+            if(_presenter.TryGetCanPutPosses(_curColor,list)) {
+                foreach(var pos in list) {
+                    var marker = MarkerObjectPoolMono.Instance.Pop();
+                    marker.transform.position = _offset + new Vector3(pos.x,0,-pos.y);
+                    marker.transform.SetParent(_markerParent);
+                }
+            }
+        }
+        private void Update() {
+            if(Input.GetMouseButtonDown(0)) {
+                var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if(Physics.Raycast(mouseRay,out var hit,100,_fieldLayerMask)) {
+                    var hitPos = hit.point - _offset;
+                    hitPos.z *= -1;
+                    var pos = new Vector2Int(Mathf.RoundToInt(hitPos.x),Mathf.RoundToInt(hitPos.z));
+                    if(_presenter.TryPut(pos,_curColor)) {
+                        _curColor = CellColorEx.GetOpposite(_curColor);
+                        ShowCanPutMarker();
+                    }
+                }
+            }
+        }
+        /*
         private async UniTask Loop() {
             while(true) {
-                CalculateCanPut();
+                ShowCanPutMarker();
                 if(_presenter.TryPut(_canPutPosList.RandomValue(),_curColor)) {
                     _curColor = CellColorEx.GetOpposite(_curColor);
-                    CalculateCanPut();
+                    ShowCanPutMarker();
                     if(_canPutPosList.Count == 0) {
                         _curColor = CellColorEx.GetOpposite(_curColor);
-                        CalculateCanPut();
+                        ShowCanPutMarker();
                         if(_canPutPosList.Count == 0) {
                             _presenter.Dispose();
                             ResetGame();
@@ -36,19 +64,6 @@ namespace Field {
                 }
                 await UniTask.Yield(gameObject.GetCancellationTokenOnDestroy());
             }
-        }
-        private void CalculateCanPut() {
-            _canPutPosList.Clear();
-            for(var y = _presenter.Size.y - 1;y >= 0;y--) {
-                for(var x = 0;x < _presenter.Size.x;x++) {
-                    var checkPos = new Vector2Int(x,y);
-                    if(_presenter.TryGetFlipPosses(checkPos,_curColor,_forProcess)) {
-                        _canPutPosList.Add(checkPos);
-                    } else {
-                        _presenter.TryGetCell(checkPos,out var cellColor);
-                    }
-                }
-            }
-        }
+        }*/
     }
 }
