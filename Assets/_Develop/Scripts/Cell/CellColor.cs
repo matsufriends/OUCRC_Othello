@@ -1,9 +1,9 @@
 ﻿using System;
 namespace Cell {
     public enum CellColor {
-        None
-       ,Black
-       ,White
+        None = 0
+       ,Black = 1
+       ,White = 2
     }
     public static class CellColorEx {
         public static CellColor GetOpposite(CellColor a) {
