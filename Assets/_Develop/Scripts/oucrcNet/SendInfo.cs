@@ -1,5 +1,6 @@
 namespace oucrcNet {
-    public struct SendInfo {
+    [System.Serializable]
+    public class SendInfo {
         public int row;
         public int column;
         public string user_id;

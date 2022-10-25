@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cell;
+using oucrcNet;
 using UniRx;
 using UnityEngine;
 namespace Field {
@@ -16,6 +17,9 @@ namespace Field {
             _compositeDisposable.Add(_fieldView);
             _fieldModel.OnUpdateCell.Subscribe(_fieldView.UpdateCell).AddTo(_compositeDisposable);
             _fieldModel.Init();
+        }
+        public void ReceiveData(ReceiveInfo receive) {
+            _fieldModel.ReceiveData(receive);
         }
         public void Dispose() {
             _compositeDisposable.Dispose();

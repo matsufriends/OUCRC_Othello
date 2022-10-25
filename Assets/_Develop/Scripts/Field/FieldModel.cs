@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cell;
+using oucrcNet;
 using UniRx;
 using UnityEngine;
 namespace Field {
@@ -47,6 +48,16 @@ namespace Field {
             if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");
             _cellGrid[pos.x,pos.y] = cellColor;
             _updateCellSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
+        }
+        public void ReceiveData(ReceiveInfo receiveInfo) {
+            for(var x = 0;x < Size.x;x++) {
+                for(var y = 0;y < Size.y;y++) {
+                    var pos = new Vector2Int(x,y);
+                    if(receiveInfo.board[y][x] == 0) continue;
+                    var color = receiveInfo.board[y][x] == 1 ? CellColor.Black : CellColor.White;
+                    SetCell(pos,color,0);
+                }
+            }
         }
         public bool TryPut(Vector2Int putPos,CellColor putColor) {
             var flipPosList = new List<Vector2Int>();
