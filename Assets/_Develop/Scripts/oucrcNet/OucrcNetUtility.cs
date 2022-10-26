@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 namespace oucrcNet {
     public static class OucrcNetUtility {
+        private static string s_url;
+        public static void Init(string url) {
+            s_url = url;
+        }
         public static async UniTask Send(string url,string roomId,Vector2Int pos,string userId) {
             var sendInfo = new SendInfo {
                 column  = pos.x
