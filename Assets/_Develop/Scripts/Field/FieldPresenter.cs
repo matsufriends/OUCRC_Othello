@@ -6,10 +6,9 @@ using UniRx;
 using UnityEngine;
 namespace Field {
     public sealed class FieldPresenter : IDisposable {
+        private readonly CompositeDisposable _compositeDisposable = new();
         private readonly FieldModel _fieldModel;
         private readonly FieldView _fieldView;
-        private readonly CompositeDisposable _compositeDisposable = new();
-        public Vector2Int Size => _fieldModel.Size;
         public FieldPresenter(Vector2Int size,Vector3 offset) {
             _fieldModel = new FieldModel(size);
             _fieldView  = new FieldView(offset);
@@ -18,11 +17,12 @@ namespace Field {
             _fieldModel.OnUpdateCell.Subscribe(_fieldView.UpdateCell).AddTo(_compositeDisposable);
             _fieldModel.Init();
         }
-        public void ReceiveData(ReceiveInfo receive) {
-            _fieldModel.ReceiveData(receive);
-        }
+        public Vector2Int Size => _fieldModel.Size;
         public void Dispose() {
             _compositeDisposable.Dispose();
+        }
+        public void SetRoom(RoomInfo room) {
+            _fieldModel.ReceiveData(room);
         }
         public bool TryGetCell(Vector2Int pos,out CellColor cellColor) {
             return _fieldModel.TryGetCell(pos,out cellColor);

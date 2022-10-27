@@ -6,10 +6,6 @@ using UniRx;
 using UnityEngine;
 namespace Field {
     public class FieldModel : IDisposable {
-        public readonly Vector2Int Size;
-        private readonly CellColor[,] _cellGrid;
-        private readonly Subject<CellUpdateInfo> _updateCellSubject = new();
-        public IObservable<CellUpdateInfo> OnUpdateCell => _updateCellSubject;
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)
            ,new(-1,0)
@@ -20,10 +16,17 @@ namespace Field {
            ,new(1,0)
            ,new(1,1)
         };
+        private readonly CellColor[,] _cellGrid;
+        private readonly Subject<CellUpdateInfo> _updateCellSubject = new();
+        public readonly Vector2Int Size;
         public FieldModel(Vector2Int size) {
             if(size.x % 2 != 0 || size.y % 2 != 0) throw new ArgumentException($"サイズが偶数じゃない:({size})");
             Size      = size;
             _cellGrid = new CellColor[size.x,size.y];
+        }
+        public IObservable<CellUpdateInfo> OnUpdateCell => _updateCellSubject;
+        public void Dispose() {
+            _updateCellSubject?.Dispose();
         }
         public void Init() {
             //左下、右上が黒
@@ -49,12 +52,12 @@ namespace Field {
             _cellGrid[pos.x,pos.y] = cellColor;
             _updateCellSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
         }
-        public void ReceiveData(ReceiveInfo receiveInfo) {
+        public void ReceiveData(RoomInfo roomInfo) {
             for(var x = 0;x < Size.x;x++) {
                 for(var y = 0;y < Size.y;y++) {
                     var pos = new Vector2Int(x,y);
-                    if(receiveInfo.board[y][x] == 0) continue;
-                    var color = receiveInfo.board[y][x] == 1 ? CellColor.Black : CellColor.White;
+                    if(roomInfo.board[y][x] == 0) continue;
+                    var color = roomInfo.board[y][x] == 1 ? CellColor.Black : CellColor.White;
                     SetCell(pos,color,0);
                 }
             }
@@ -75,9 +78,7 @@ namespace Field {
             for(var y = 0;y < Size.x;y++) {
                 for(var x = 0;x < Size.x;x++) {
                     var checkPos = new Vector2Int(x,y);
-                    if(TryGetFlipPosses(checkPos,putColor,null,true)) {
-                        canPutPosList.Add(checkPos);
-                    }
+                    if(TryGetFlipPosses(checkPos,putColor,null,true)) canPutPosList.Add(checkPos);
                 }
             }
             return canPutPosList.Count > 0;
@@ -88,9 +89,7 @@ namespace Field {
             return TryGetFlipPosses(putPos,putColor,flipPosList,false);
         }
         private bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList,bool checkCanPutOnly) {
-            if(TryGetCell(putPos,out var cellColor) == false || cellColor != CellColor.None) {
-                return false;
-            }
+            if(TryGetCell(putPos,out var cellColor) == false || cellColor != CellColor.None) return false;
             foreach(var dir in s_dirVec) {
                 var hasOpposite = false;
                 for(var dirLen = 1;dirLen < Mathf.Max(Size.x,Size.y);dirLen++) {
@@ -102,13 +101,12 @@ namespace Field {
                         if(checkCanPutOnly) return true;
                         for(var i = 1;i < dirLen;i++) flipPosList.Add(putPos + dir * i);
                         break;
-                    } else break;
+                    } else {
+                        break;
+                    }
                 }
             }
             return checkCanPutOnly == false && flipPosList.Count > 0;
-        }
-        public void Dispose() {
-            _updateCellSubject?.Dispose();
         }
     }
 }

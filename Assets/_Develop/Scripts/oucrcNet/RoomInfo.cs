@@ -1,9 +1,9 @@
-using Cell;
+using System;
 using MornLib.Cores;
 using UnityEngine;
 namespace oucrcNet {
-    [System.Serializable]
-    public class ReceiveInfo {
+    [Serializable]
+    public class RoomInfo {
         public string id = " ";
         public UserInfo black = new();
         public UserInfo white = new();
