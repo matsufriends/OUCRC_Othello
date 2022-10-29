@@ -22,7 +22,7 @@ namespace Field {
             _compositeDisposable.Dispose();
         }
         public void SetRoom(RoomInfo room) {
-            _fieldModel.ReceiveData(room);
+            _fieldModel.SetRoom(room);
         }
         public bool TryGetCell(Vector2Int pos,out CellColor cellColor) {
             return _fieldModel.TryGetCell(pos,out cellColor);

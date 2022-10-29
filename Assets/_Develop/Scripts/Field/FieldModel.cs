@@ -49,10 +49,11 @@ namespace Field {
         }
         private void SetCell(Vector2Int pos,CellColor cellColor,int animOffset) {
             if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");
+            if(_cellGrid[pos.x,pos.y] == cellColor) return;
             _cellGrid[pos.x,pos.y] = cellColor;
             _updateCellSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
         }
-        public void ReceiveData(RoomInfo roomInfo) {
+        public void SetRoom(RoomInfo roomInfo) {
             for(var x = 0;x < Size.x;x++) {
                 for(var y = 0;y < Size.y;y++) {
                     var pos = new Vector2Int(x,y);

@@ -66,12 +66,13 @@ namespace oucrcNet {
             using var request = UnityWebRequest.Get($"{url}/rooms");
             await request.SendWebRequest().ToUniTask(cancellationToken: token);
             if(request.result != UnityWebRequest.Result.Success) return null;
-            var allRoomInfo = JsonMapper.ToObject<AllRoomInfo>($"{{\"rooms\":{request.downloadHandler.text}}}");
-            return allRoomInfo.Rooms;
+            var tex = $"{{\"rooms\":{request.downloadHandler.text}}}";
+            var allRoomInfo = JsonMapper.ToObject<AllRoomInfo>(tex);
+            return allRoomInfo.rooms;
         }
         [Serializable]
         private sealed class AllRoomInfo {
-            public RoomInfo[] Rooms;
+            public RoomInfo[] rooms = new RoomInfo[2];
         }
     }
 }
