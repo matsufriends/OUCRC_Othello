@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cell;
 using UniRx;
 using UnityEngine;
@@ -31,11 +32,12 @@ namespace Field {
             for(var x = 0;x < _size.x;x++) {
                 for(var y = 0;y < _size.y;y++) {
                     if(board[x,y] == _cellGrid[x,y]) continue;
-                    UpdateGrid(new Vector2Int(x,y),board[x,y],0);
+                    ChangeCell(new Vector2Int(x,y),board[x,y],0);
                 }
             }
         }
         private bool IsInner(Vector2Int pos) => 0 <= pos.x && pos.x < _size.x && 0 <= pos.y && pos.y < _size.y;
+        public int GetCellCount() => _cellGrid.Cast<CellColor>().Count(cellColor => cellColor != CellColor.None);
         public bool TryGetCellColor(Vector2Int pos,out CellColor cellColor) {
             if(IsInner(pos) == false) {
                 cellColor = CellColor.None;
@@ -44,35 +46,35 @@ namespace Field {
             cellColor = _cellGrid[pos.x,pos.y];
             return true;
         }
-        private void UpdateGrid(Vector2Int pos,CellColor cellColor,int animOffset) {
+        private void ChangeCell(Vector2Int pos,CellColor cellColor,int animOffset) {
             if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");
             if(_cellGrid[pos.x,pos.y] == cellColor) return;
             _cellGrid[pos.x,pos.y] = cellColor;
             _gridChangedSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
         }
-        public void ForcePut(Vector2Int pos,CellColor cellColor) => UpdateGrid(pos,cellColor,0);
+        public void ForcePut(Vector2Int pos,CellColor cellColor) => ChangeCell(pos,cellColor,0);
         public bool TryPut(Vector2Int putPos,CellColor putColor) {
             var flipPosList = new List<Vector2Int>();
             if(TryGetFlipPosses(putPos,putColor,flipPosList) == false) return false;
-            UpdateGrid(putPos,putColor,0);
+            ChangeCell(putPos,putColor,0);
             foreach(var flipPos in flipPosList) {
                 var dif = putPos - flipPos;
                 var animOffset = Mathf.Max(Mathf.Abs(dif.x),Mathf.Abs(dif.y));
-                UpdateGrid(flipPos,putColor,animOffset);
+                ChangeCell(flipPos,putColor,animOffset);
             }
             return true;
         }
         public bool TryGetCanPutPosses(CellColor putColor,List<Vector2Int> canPutPosList) {
             canPutPosList.Clear();
-            for(var y = 0;y < _size.x;y++) {
-                for(var x = 0;x < _size.x;x++) {
+            for(var x = 0;x < _size.y;x++) {
+                for(var y = 0;y < _size.x;y++) {
                     var checkPos = new Vector2Int(x,y);
                     if(TryGetFlipPosses(checkPos,putColor,null,true)) canPutPosList.Add(checkPos);
                 }
             }
             return canPutPosList.Count > 0;
         }
-        public bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList) {
+        private bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList) {
             if(flipPosList == null) return false;
             flipPosList.Clear();
             return TryGetFlipPosses(putPos,putColor,flipPosList,false);

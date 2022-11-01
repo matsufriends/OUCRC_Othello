@@ -21,10 +21,9 @@ namespace Field {
         }
         public void Dispose() => _compositeDisposable.Dispose();
         public void InitializeBoard(CellColor[,] board) => _fieldModel.InitializeBoard(board);
-        public bool TryGetCell(Vector2Int        pos,     out CellColor    cellColor) => _fieldModel.TryGetCellColor(pos,out cellColor);
+        public int GetCellCount() => _fieldModel.GetCellCount();
+        public bool TryGetCellColor(Vector2Int   pos,     out CellColor    cellColor) => _fieldModel.TryGetCellColor(pos,out cellColor);
         public bool TryGetCanPutPosses(CellColor putColor,List<Vector2Int> canPutPosList) => _fieldModel.TryGetCanPutPosses(putColor,canPutPosList);
-        public bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList)
-            => _fieldModel.TryGetFlipPosses(putPos,putColor,flipPosList);
-        public bool TryPut(Vector2Int putPos,CellColor putColor) => _fieldModel.TryPut(putPos,putColor);
+        public bool TryPut(Vector2Int            putPos,  CellColor        putColor) => _fieldModel.TryPut(putPos,putColor);
     }
 }

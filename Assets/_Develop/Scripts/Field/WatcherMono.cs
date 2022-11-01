@@ -55,23 +55,29 @@ namespace Field {
                             offset.x += (s_size.x + 4) * i;
                             _presenterList.Add(new FieldPresenter(s_size,offset));
                         }
-                        var width = rooms.GetLength(1);
-                        var height = rooms.GetLength(0);
-                        var board = new CellColor[width,height];
-                        for(var x = 0;x < width;x++) {
-                            for(var y = 0;y < height;y++) {
-                                board[x,y] = rooms[i].board[y][x] switch {
-                                    0 => CellColor.None
-                                   ,1 => CellColor.Black
-                                   ,2 => CellColor.White
-                                   ,_ => throw new ArgumentOutOfRangeException()
-                                };
-                            }
-                        }
-                        _presenterList[i].InitializeBoard(board);
+                        ApplyRoom(_presenterList[i],rooms[i]);
                     }
                 await UniTask.Delay(TimeSpan.FromSeconds(5),cancellationToken: token);
             }
+        }
+        private void ApplyRoom(FieldPresenter presenter,RoomInfo room) {
+            var roomCellCount = room.GetCellCount();
+            var presenterCellCount = presenter.GetCellCount();
+            if(presenterCellCount == roomCellCount) return;
+            if(presenterCellCount + 1 == roomCellCount) {
+                var size = room.Size;
+                var roomGrid = room.GetGrid();
+                for(var x = 0;x < size.x;x++) {
+                    for(var y = 0;y < size.y;y++) {
+                        var pos = new Vector2Int(x,y);
+                        if(presenter.TryGetCellColor(pos,out var cellColor) && cellColor != roomGrid[x,y]) {
+                            presenter.TryPut(pos,roomGrid[x,y]);
+                            return;
+                        }
+                    }
+                }
+            }
+            presenter.InitializeBoard(room.GetGrid());
         }
         private void ResetGame() {
             //_offset        = transform.position + new Vector3(0.5f - s_size.x / 2f,0,-0.5f + s_size.y / 2f);
