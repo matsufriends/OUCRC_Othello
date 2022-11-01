@@ -15,10 +15,10 @@ namespace Field {
         [SerializeField] private LayerMask _fieldLayerMask;
         [SerializeField] private Transform _markerParent;
         private readonly List<Vector2Int> _forProcess = new();
+        private readonly List<FieldPresenter> _presenterList = new();
         private CellColor _curColor;
         private MornTaskCanceller _loopCanceller;
         private Vector3 _offset;
-        private readonly List<FieldPresenter> _presenterList = new();
         private void Awake() {
             _loopCanceller = new MornTaskCanceller(gameObject);
             OucrcNetUtility.Instance.OnUrlUpdated.Where(x => x == _oucrcNetType).Subscribe(
@@ -48,16 +48,28 @@ namespace Field {
         private async UniTask WatchLoop(CancellationToken token) {
             while(true) {
                 var rooms = await OucrcNetUtility.Instance.GetAllRooms(_oucrcNetType,token);
-                if(rooms != null) {
+                if(rooms != null)
                     for(var i = 0;i < rooms.Length;i++) {
                         if(_presenterList.Count <= i) {
                             var offset = transform.position + new Vector3(0.5f - s_size.x / 2f,0,-0.5f + s_size.y / 2f);
                             offset.x += (s_size.x + 4) * i;
                             _presenterList.Add(new FieldPresenter(s_size,offset));
                         }
-                        _presenterList[i].SetRoom(rooms[i]);
+                        var width = rooms.GetLength(1);
+                        var height = rooms.GetLength(0);
+                        var board = new CellColor[width,height];
+                        for(var x = 0;x < width;x++) {
+                            for(var y = 0;y < height;y++) {
+                                board[x,y] = rooms[i].board[y][x] switch {
+                                    0 => CellColor.None
+                                   ,1 => CellColor.Black
+                                   ,2 => CellColor.White
+                                   ,_ => throw new ArgumentOutOfRangeException()
+                                };
+                            }
+                        }
+                        _presenterList[i].InitializeBoard(board);
                     }
-                }
                 await UniTask.Delay(TimeSpan.FromSeconds(5),cancellationToken: token);
             }
         }
