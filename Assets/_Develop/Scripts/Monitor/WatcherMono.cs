@@ -6,9 +6,10 @@ using Cysharp.Threading.Tasks;
 using MornLib.Cores;
 using MornLib.Extensions;
 using oucrcNet;
+using Reversi;
 using UniRx;
 using UnityEngine;
-namespace Field {
+namespace Monitor {
     public class WatcherMono : MonoBehaviour {
         private static readonly Vector2Int s_size = new(20,20);
         [SerializeField] private OucrcNetType _oucrcNetType;

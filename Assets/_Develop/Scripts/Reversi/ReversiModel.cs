@@ -4,7 +4,7 @@ using System.Linq;
 using Cell;
 using UniRx;
 using UnityEngine;
-namespace Field {
+namespace Reversi {
     public class ReversiModel : IDisposable {
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)

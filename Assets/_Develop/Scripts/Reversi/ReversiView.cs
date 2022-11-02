@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cell;
+using Field;
 using UnityEngine;
 using Object = UnityEngine.Object;
-namespace Field {
+namespace Reversi {
     public sealed class ReversiView : IDisposable {
         private readonly Dictionary<Vector2Int,CellMono> _cellDictionary = new();
         private readonly FieldMono _field;
@@ -14,7 +15,7 @@ namespace Field {
             _field.transform.position = offset;
         }
         void IDisposable.Dispose() {
-            foreach(var (_,value) in _cellDictionary) {
+            foreach(var value in _cellDictionary.Values) {
                 CellPoolMono.Instance.Push(value);
             }
             Object.Destroy(_field.gameObject);

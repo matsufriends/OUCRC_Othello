@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Cell;
 using UniRx;
 using UnityEngine;
-namespace Field {
+namespace Reversi {
     public sealed class ReversiPresenter : IDisposable {
         private readonly CompositeDisposable _compositeDisposable = new();
         private readonly ReversiModel _reversiModel;
