@@ -5,7 +5,7 @@ using Cell;
 using UniRx;
 using UnityEngine;
 namespace Field {
-    public class FieldModel : IDisposable {
+    public class ReversiModel : IDisposable {
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)
            ,new(-1,0)
@@ -19,7 +19,7 @@ namespace Field {
         private readonly CellColor[,] _cellGrid;
         private readonly Subject<CellUpdateInfo> _gridChangedSubject = new();
         private readonly Vector2Int _size;
-        public FieldModel(Vector2Int size) {
+        public ReversiModel(Vector2Int size) {
             if(size.x % 2 != 0 || size.y % 2 != 0) throw new ArgumentException($"サイズが偶数じゃない:({size})");
             _size     = size;
             _cellGrid = new CellColor[size.x,size.y];

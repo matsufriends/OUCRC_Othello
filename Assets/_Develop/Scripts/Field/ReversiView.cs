@@ -4,16 +4,16 @@ using Cell;
 using UnityEngine;
 using Object = UnityEngine.Object;
 namespace Field {
-    public sealed class FieldView : IDisposable {
+    public sealed class ReversiView : IDisposable {
         private readonly Dictionary<Vector2Int,CellMono> _cellDictionary = new();
         private readonly FieldMono _field;
         private readonly Vector3 _offset;
-        public FieldView(Vector3 offset) {
+        public ReversiView(Vector3 offset) {
             _offset                   = offset;
             _field                    = FieldObjectPoolMono.Instance.Pop();
             _field.transform.position = offset;
         }
-        public void Dispose() {
+        void IDisposable.Dispose() {
             foreach(var (_,value) in _cellDictionary) {
                 CellPoolMono.Instance.Push(value);
             }
