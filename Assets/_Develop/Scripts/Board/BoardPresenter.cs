@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
+using VContainer;
 namespace OucrcReversi.Board {
     public sealed class BoardPresenter : IDisposable {
         private readonly IBoardModel _boardModel;
         private readonly IBoardView _boardView;
         private readonly CompositeDisposable _compositeDisposable = new();
+        [Inject]
         public BoardPresenter(IBoardModel boardModel,IBoardView boardView) {
             _boardModel = boardModel;
             _boardView  = boardView;

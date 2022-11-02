@@ -7,15 +7,15 @@ using MornLib.Singletons;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Networking;
-namespace OucrcReversi.oucrcNet {
-    public class OucrcNetUtility : Singleton<OucrcNetUtility> {
+namespace OucrcReversi.Network {
+    public class ServerUtility : Singleton<ServerUtility> {
         private readonly Subject<OucrcNetType> _urlUpdateSubject = new();
         private string _battleUrl;
         private string _watchUrl;
         public IObservable<OucrcNetType> OnUrlUpdated => _urlUpdateSubject;
         protected override void Instanced() {
-            _watchUrl  = PlayerPrefs.GetString(nameof(_watchUrl),"");
-            _battleUrl = PlayerPrefs.GetString(nameof(_battleUrl),"");
+            _watchUrl  = PlayerPrefs.GetString(OucrcNetTypeEx.ToString(OucrcNetType.Watch),"");
+            _battleUrl = PlayerPrefs.GetString(OucrcNetTypeEx.ToString(OucrcNetType.Battle),"");
         }
         public void SetUrl(OucrcNetType netType,string url) {
             switch(netType) {
@@ -27,12 +27,12 @@ namespace OucrcReversi.oucrcNet {
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(netType),netType,null);
             }
-            PlayerPrefs.SetString(netType.ToString(),url);
+            PlayerPrefs.SetString(OucrcNetTypeEx.ToString(netType),url);
             PlayerPrefs.Save();
             _urlUpdateSubject.OnNext(netType);
         }
-        public async UniTask Send(string url,string roomId,Vector2Int pos,string userId) {
-            var sendInfo = new SendInfo {
+        public async UniTask Post(string url,string roomId,Vector2Int pos,string userId) {
+            var sendInfo = new CellPositionAndUserId {
                 column  = pos.x
                ,row     = pos.y
                ,user_id = userId
@@ -51,15 +51,15 @@ namespace OucrcReversi.oucrcNet {
            ,OucrcNetType.Battle => _battleUrl
            ,_                   => throw new ArgumentOutOfRangeException(nameof(oucrcNetType),oucrcNetType,null)
         };
-        public async UniTask<RoomInfo> GetRoom(OucrcNetType oucrcNetType,string roomId,CancellationToken token) {
+        public async UniTask<RoomIdUsersAndBoards> GetRoom(OucrcNetType oucrcNetType,string roomId,CancellationToken token) {
             var url = GetUrl(oucrcNetType);
             using var request = UnityWebRequest.Get($"{url}/rooms/{roomId}");
             await request.SendWebRequest().ToUniTask(cancellationToken: token);
             if(request.result != UnityWebRequest.Result.Success) return null;
-            var room = JsonMapper.ToObject<RoomInfo>(request.downloadHandler.text);
+            var room = JsonMapper.ToObject<RoomIdUsersAndBoards>(request.downloadHandler.text);
             return room;
         }
-        public async UniTask<RoomInfo[]> GetAllRooms(OucrcNetType oucrcNetType,CancellationToken token) {
+        public async UniTask<RoomIdUsersAndBoards[]> GetAllRooms(OucrcNetType oucrcNetType,CancellationToken token) {
             var url = GetUrl(oucrcNetType);
             using var request = UnityWebRequest.Get($"{url}/rooms");
             await request.SendWebRequest().ToUniTask(cancellationToken: token);
@@ -70,7 +70,7 @@ namespace OucrcReversi.oucrcNet {
         }
         [Serializable]
         private sealed class AllRoomInfo {
-            public RoomInfo[] rooms = new RoomInfo[2];
+            public RoomIdUsersAndBoards[] rooms = new RoomIdUsersAndBoards[2];
         }
     }
 }

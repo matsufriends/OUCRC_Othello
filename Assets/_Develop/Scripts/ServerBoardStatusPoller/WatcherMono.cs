@@ -6,7 +6,7 @@ using MornLib.Cores;
 using MornLib.Extensions;
 using OucrcReversi.Board;
 using OucrcReversi.Cell;
-using OucrcReversi.oucrcNet;
+using OucrcReversi.Network;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.ServerBoardStatusPoller {
@@ -22,7 +22,7 @@ namespace OucrcReversi.ServerBoardStatusPoller {
         private Vector3 _offset;
         private void Awake() {
             _loopCanceller = new MornTaskCanceller(gameObject);
-            OucrcNetUtility.Instance.OnUrlUpdated.Where(x => x == _oucrcNetType).Subscribe(
+            ServerUtility.Instance.OnUrlUpdated.Where(x => x == _oucrcNetType).Subscribe(
                 x => {
                     _loopCanceller?.Cancel();
                     _loopCanceller = new MornTaskCanceller(gameObject);
@@ -48,7 +48,7 @@ namespace OucrcReversi.ServerBoardStatusPoller {
         }
         private async UniTask WatchLoop(CancellationToken token) {
             while(true) {
-                var rooms = await OucrcNetUtility.Instance.GetAllRooms(_oucrcNetType,token);
+                var rooms = await ServerUtility.Instance.GetAllRooms(_oucrcNetType,token);
                 if(rooms != null)
                     for(var i = 0;i < rooms.Length;i++) {
                         if(_presenterList.Count <= i) {
@@ -61,7 +61,7 @@ namespace OucrcReversi.ServerBoardStatusPoller {
                 await UniTask.Delay(TimeSpan.FromSeconds(5),cancellationToken: token);
             }
         }
-        private void ApplyRoom(BoardPresenter presenter,RoomInfo room) {
+        private void ApplyRoom(BoardPresenter presenter,RoomIdUsersAndBoards room) {
             var roomCellCount = room.GetCellCount();
             var presenterCellCount = presenter.GetCellCount();
             if(presenterCellCount == roomCellCount) return;

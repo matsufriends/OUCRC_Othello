@@ -14,7 +14,7 @@ namespace OucrcReversi.Cell {
                                                      x.transform.SetParent(transform);
                                                  },50
                                              );
-        public CellMono Pop() => _mornObjectPool.Pop();
-        public void Push(CellMono poolObject) => _mornObjectPool.Push(poolObject);
+        public CellMono Pop() => _mornObjectPool.Rent();
+        public void Push(CellMono poolObject) => _mornObjectPool.Return(poolObject);
     }
 }

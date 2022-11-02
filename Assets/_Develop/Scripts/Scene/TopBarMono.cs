@@ -1,5 +1,6 @@
 using DG.Tweening;
 using MornLib.Scenes;
+using OucrcReversi.Network;
 using OucrcReversi.oucrcNet;
 using TMPro;
 using UniRx;
@@ -18,8 +19,8 @@ namespace OucrcReversi.Scene {
         [SerializeField] private Button _battleSendButton;
         private bool _isActive;
         private void Awake() {
-            _watchSendButton.OnClickAsObservable().Subscribe(_ => OucrcNetUtility.Instance.SetUrl(OucrcNetType.Watch,_watchUrlInputField.text)).AddTo(this);
-            _battleSendButton.OnClickAsObservable().Subscribe(_ => OucrcNetUtility.Instance.SetUrl(OucrcNetType.Battle,_battleUrlInputField.text)).AddTo(this);
+            _watchSendButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.SetUrl(OucrcNetType.Watch,_watchUrlInputField.text)).AddTo(this);
+            _battleSendButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.SetUrl(OucrcNetType.Battle,_battleUrlInputField.text)).AddTo(this);
             _barToggleButton.OnClickAsObservable().Subscribe(
                 _ => {
                     _isActive = !_isActive;

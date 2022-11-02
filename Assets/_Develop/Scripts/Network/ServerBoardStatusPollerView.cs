@@ -1,3 +1,3 @@
-﻿namespace OucrcReversi.ServerBoardStatusPoller {
+﻿namespace OucrcReversi.Network {
     public sealed class ServerBoardStatusPollerView { }
 }
