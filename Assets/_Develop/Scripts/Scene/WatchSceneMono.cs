@@ -1,4 +1,4 @@
 using MornLib.Scenes;
-namespace Scene {
+namespace OucrcReversi.Scene {
     public class WatchSceneMono : MornSceneMono { }
 }

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace Field {
+namespace OucrcReversi.Field {
     public class FieldMono : MonoBehaviour {
         
     }

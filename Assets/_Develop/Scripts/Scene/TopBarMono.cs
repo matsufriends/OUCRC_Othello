@@ -1,11 +1,11 @@
 using DG.Tweening;
 using MornLib.Scenes;
-using oucrcNet;
+using OucrcReversi.oucrcNet;
 using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-namespace Scene {
+namespace OucrcReversi.Scene {
     public class TopBarMono : MornSceneMono {
         [SerializeField] private Vector2 _hidePos;
         [SerializeField] private Vector2 _showPos;

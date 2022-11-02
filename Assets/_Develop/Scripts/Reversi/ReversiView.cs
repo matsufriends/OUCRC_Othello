@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cell;
-using Field;
+using OucrcReversi.Cell;
+using OucrcReversi.Field;
 using UnityEngine;
 using Object = UnityEngine.Object;
-namespace Reversi {
+namespace OucrcReversi.Reversi {
     public sealed class ReversiView : IDisposable {
         private readonly Dictionary<Vector2Int,CellMono> _cellDictionary = new();
         private readonly FieldMono _field;

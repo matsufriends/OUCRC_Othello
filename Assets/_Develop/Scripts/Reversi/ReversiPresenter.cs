@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cell;
+using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
-namespace Reversi {
+namespace OucrcReversi.Reversi {
     public sealed class ReversiPresenter : IDisposable {
         private readonly CompositeDisposable _compositeDisposable = new();
         private readonly ReversiModel _reversiModel;

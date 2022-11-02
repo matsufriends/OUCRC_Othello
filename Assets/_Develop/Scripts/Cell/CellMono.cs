@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using MornLib.Cores;
 using UnityEngine;
 using Random = UnityEngine.Random;
-namespace Cell {
+namespace OucrcReversi.Cell {
     public class CellMono : MonoBehaviour {
         private const float c_diff = 0.1f;
         private MornTaskCanceller _canceller;

@@ -1,8 +1,8 @@
 using System;
-using Cell;
 using MornLib.Cores;
+using OucrcReversi.Cell;
 using UnityEngine;
-namespace oucrcNet {
+namespace OucrcReversi.oucrcNet {
     [Serializable]
     public class RoomInfo {
         public string id = " ";

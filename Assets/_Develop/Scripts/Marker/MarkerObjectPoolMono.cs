@@ -1,4 +1,4 @@
 using MornLib.Pool;
-namespace Marker {
+namespace OucrcReversi.Marker {
     public class MarkerObjectPoolMono : MornObjectPoolMono<Marker> { }
 }

@@ -7,7 +7,7 @@ using MornLib.Singletons;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Networking;
-namespace oucrcNet {
+namespace OucrcReversi.oucrcNet {
     public class OucrcNetUtility : Singleton<OucrcNetUtility> {
         private readonly Subject<OucrcNetType> _urlUpdateSubject = new();
         private string _battleUrl;
@@ -46,13 +46,11 @@ namespace oucrcNet {
             await request.SendWebRequest();
             request.Dispose();
         }
-        private string GetUrl(OucrcNetType oucrcNetType) {
-            return oucrcNetType switch {
-                OucrcNetType.Watch  => _watchUrl
-               ,OucrcNetType.Battle => _battleUrl
-               ,_                   => throw new ArgumentOutOfRangeException(nameof(oucrcNetType),oucrcNetType,null)
-            };
-        }
+        private string GetUrl(OucrcNetType oucrcNetType) => oucrcNetType switch {
+            OucrcNetType.Watch  => _watchUrl
+           ,OucrcNetType.Battle => _battleUrl
+           ,_                   => throw new ArgumentOutOfRangeException(nameof(oucrcNetType),oucrcNetType,null)
+        };
         public async UniTask<RoomInfo> GetRoom(OucrcNetType oucrcNetType,string roomId,CancellationToken token) {
             var url = GetUrl(oucrcNetType);
             using var request = UnityWebRequest.Get($"{url}/rooms/{roomId}");

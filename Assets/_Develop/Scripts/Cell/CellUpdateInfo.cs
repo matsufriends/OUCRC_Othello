@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace Cell {
+namespace OucrcReversi.Cell {
     public readonly struct CellUpdateInfo {
         public readonly Vector2Int Pos;
         public readonly CellColor CellColor;

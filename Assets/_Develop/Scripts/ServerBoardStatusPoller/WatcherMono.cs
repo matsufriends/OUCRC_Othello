@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cell;
 using Cysharp.Threading.Tasks;
 using MornLib.Cores;
 using MornLib.Extensions;
-using oucrcNet;
-using Reversi;
+using OucrcReversi.Cell;
+using OucrcReversi.oucrcNet;
+using OucrcReversi.Reversi;
 using UniRx;
 using UnityEngine;
-namespace Monitor {
+namespace OucrcReversi.ServerBoardStatusPoller {
     public class WatcherMono : MonoBehaviour {
         private static readonly Vector2Int s_size = new(20,20);
         [SerializeField] private OucrcNetType _oucrcNetType;

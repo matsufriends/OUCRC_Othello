@@ -1,4 +1,4 @@
 ﻿using MornLib.Pool;
-namespace Field {
+namespace OucrcReversi.Field {
     public class FieldObjectPoolMono : MornObjectPoolMono<FieldMono> { }
 }

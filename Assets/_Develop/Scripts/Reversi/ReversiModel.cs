@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cell;
+using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
-namespace Reversi {
+namespace OucrcReversi.Reversi {
     public class ReversiModel : IDisposable {
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)
