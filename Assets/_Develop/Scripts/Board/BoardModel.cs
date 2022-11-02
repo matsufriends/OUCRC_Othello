@@ -5,7 +5,7 @@ using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Board {
-    public class BoardModel : IDisposable {
+    public class BoardModel : IBoardModel {
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)
            ,new(-1,0)
@@ -23,13 +23,14 @@ namespace OucrcReversi.Board {
             if(size.x % 2 != 0 || size.y % 2 != 0) throw new ArgumentException($"サイズが偶数じゃない:({size})");
             _size     = size;
             _cellGrid = new CellColor[size.x,size.y];
-            ForcePut(new Vector2Int(size.x / 2,size.y / 2),CellColor.White);
-            ForcePut(new Vector2Int(size.x / 2 - 1,size.y / 2 - 1),CellColor.White);
-            ForcePut(new Vector2Int(size.x / 2 - 1,size.y / 2),CellColor.Black);
-            ForcePut(new Vector2Int(size.x / 2,size.y / 2 - 1),CellColor.Black);
+
+            //初期配置
+            ChangeCell(new Vector2Int(size.x / 2,size.y / 2),CellColor.White,0);
+            ChangeCell(new Vector2Int(size.x / 2 - 1,size.y / 2 - 1),CellColor.White,0);
+            ChangeCell(new Vector2Int(size.x / 2 - 1,size.y / 2),CellColor.Black,0);
+            ChangeCell(new Vector2Int(size.x / 2,size.y / 2 - 1),CellColor.Black,0);
         }
         public IObservable<CellUpdateInfo> OnGridChanged => _gridChangedSubject;
-        void IDisposable.Dispose() => _gridChangedSubject?.Dispose();
         public void InitializeBoard(CellColor[,] board) {
             if(board.GetLength(0) != _size.x) throw new ArgumentException("盤面の幅の不一致");
             if(board.GetLength(1) != _size.y) throw new ArgumentException("盤面の高さの不一致");
@@ -40,7 +41,6 @@ namespace OucrcReversi.Board {
                 }
             }
         }
-        private bool IsInner(Vector2Int pos) => 0 <= pos.x && pos.x < _size.x && 0 <= pos.y && pos.y < _size.y;
         public int GetCellCount() => _cellGrid.Cast<CellColor>().Count(cellColor => cellColor != CellColor.None);
         public bool TryGetCellColor(Vector2Int pos,out CellColor cellColor) {
             if(IsInner(pos) == false) {
@@ -50,13 +50,6 @@ namespace OucrcReversi.Board {
             cellColor = _cellGrid[pos.x,pos.y];
             return true;
         }
-        private void ChangeCell(Vector2Int pos,CellColor cellColor,int animOffset) {
-            if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");
-            if(_cellGrid[pos.x,pos.y] == cellColor) return;
-            _cellGrid[pos.x,pos.y] = cellColor;
-            _gridChangedSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
-        }
-        public void ForcePut(Vector2Int pos,CellColor cellColor) => ChangeCell(pos,cellColor,0);
         public bool TryPut(Vector2Int putPos,CellColor putColor) {
             var flipPosList = new List<Vector2Int>();
             if(TryGetFlipPosses(putPos,putColor,flipPosList) == false) return false;
@@ -77,6 +70,14 @@ namespace OucrcReversi.Board {
                 }
             }
             return canPutPosList.Count > 0;
+        }
+        public void Dispose() => _gridChangedSubject?.Dispose();
+        private bool IsInner(Vector2Int pos) => 0 <= pos.x && pos.x < _size.x && 0 <= pos.y && pos.y < _size.y;
+        private void ChangeCell(Vector2Int pos,CellColor cellColor,int animOffset) {
+            if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");
+            if(_cellGrid[pos.x,pos.y] == cellColor) return;
+            _cellGrid[pos.x,pos.y] = cellColor;
+            _gridChangedSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
         }
         private bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList) {
             if(flipPosList == null) return false;

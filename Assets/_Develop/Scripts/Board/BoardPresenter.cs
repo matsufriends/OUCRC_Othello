@@ -5,15 +5,15 @@ using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Board {
     public sealed class BoardPresenter : IDisposable {
-        private readonly BoardModel _boardModel;
-        private readonly BoardView3D _boardView3D;
+        private readonly IBoardModel _boardModel;
+        private readonly IBoardView _boardView;
         private readonly CompositeDisposable _compositeDisposable = new();
-        public BoardPresenter(Vector2Int size,Vector3 offset) {
-            _boardModel = new BoardModel(size);
-            _boardView3D  = new BoardView3D(offset);
+        public BoardPresenter(IBoardModel boardModel,IBoardView boardView) {
+            _boardModel = boardModel;
+            _boardView  = boardView;
             _compositeDisposable.Add(_boardModel);
-            _compositeDisposable.Add(_boardView3D);
-            _boardModel.OnGridChanged.Subscribe(_boardView3D.UpdateCell).AddTo(_compositeDisposable);
+            _compositeDisposable.Add(_boardView);
+            _boardModel.OnGridChanged.Subscribe(_boardView.UpdateCell).AddTo(_compositeDisposable);
         }
         void IDisposable.Dispose() => _compositeDisposable.Dispose();
         public void InitializeBoard(CellColor[,] board) => _boardModel.InitializeBoard(board);

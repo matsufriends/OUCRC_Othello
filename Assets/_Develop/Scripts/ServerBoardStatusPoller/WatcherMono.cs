@@ -54,7 +54,7 @@ namespace OucrcReversi.ServerBoardStatusPoller {
                         if(_presenterList.Count <= i) {
                             var offset = transform.position + new Vector3(0.5f - s_size.x / 2f,0,-0.5f + s_size.y / 2f);
                             offset.x += (s_size.x + 4) * i;
-                            _presenterList.Add(new BoardPresenter(s_size,offset));
+                            //_presenterList.Add(new BoardPresenter(s_size,offset));
                         }
                         ApplyRoom(_presenterList[i],rooms[i]);
                     }
