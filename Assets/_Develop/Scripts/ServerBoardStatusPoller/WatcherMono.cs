@@ -4,9 +4,9 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using MornLib.Cores;
 using MornLib.Extensions;
+using OucrcReversi.Board;
 using OucrcReversi.Cell;
 using OucrcReversi.oucrcNet;
-using OucrcReversi.Reversi;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.ServerBoardStatusPoller {
@@ -16,7 +16,7 @@ namespace OucrcReversi.ServerBoardStatusPoller {
         [SerializeField] private LayerMask _fieldLayerMask;
         [SerializeField] private Transform _markerParent;
         private readonly List<Vector2Int> _forProcess = new();
-        private readonly List<ReversiPresenter> _presenterList = new();
+        private readonly List<BoardPresenter> _presenterList = new();
         private CellColor _curColor;
         private MornTaskCanceller _loopCanceller;
         private Vector3 _offset;
@@ -54,14 +54,14 @@ namespace OucrcReversi.ServerBoardStatusPoller {
                         if(_presenterList.Count <= i) {
                             var offset = transform.position + new Vector3(0.5f - s_size.x / 2f,0,-0.5f + s_size.y / 2f);
                             offset.x += (s_size.x + 4) * i;
-                            _presenterList.Add(new ReversiPresenter(s_size,offset));
+                            _presenterList.Add(new BoardPresenter(s_size,offset));
                         }
                         ApplyRoom(_presenterList[i],rooms[i]);
                     }
                 await UniTask.Delay(TimeSpan.FromSeconds(5),cancellationToken: token);
             }
         }
-        private void ApplyRoom(ReversiPresenter presenter,RoomInfo room) {
+        private void ApplyRoom(BoardPresenter presenter,RoomInfo room) {
             var roomCellCount = room.GetCellCount();
             var presenterCellCount = presenter.GetCellCount();
             if(presenterCellCount == roomCellCount) return;

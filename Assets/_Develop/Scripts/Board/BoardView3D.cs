@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using OucrcReversi.Cell;
-using OucrcReversi.Field;
 using UnityEngine;
 using Object = UnityEngine.Object;
-namespace OucrcReversi.Reversi {
-    public sealed class ReversiView : IDisposable {
+namespace OucrcReversi.Board {
+    public sealed class BoardView3D : IDisposable {
+        private readonly BoardObjectMono _boardObject;
+        private readonly Vector3 _boardOffset;
         private readonly Dictionary<Vector2Int,CellMono> _cellDictionary = new();
-        private readonly FieldMono _field;
-        private readonly Vector3 _offset;
-        public ReversiView(Vector3 offset) {
-            _offset                   = offset;
-            _field                    = FieldObjectPoolMono.Instance.Pop();
-            _field.transform.position = offset;
+        public BoardView3D(Vector3 boardOffset) {
+            _boardOffset                    = boardOffset;
+            _boardObject                    = BordObjectPoolMono.Instance.Pop();
+            _boardObject.transform.position = boardOffset;
         }
         void IDisposable.Dispose() {
             foreach(var value in _cellDictionary.Values) {
                 CellPoolMono.Instance.Push(value);
             }
-            Object.Destroy(_field.gameObject);
+            Object.Destroy(_boardObject.gameObject);
         }
         public void UpdateCell(CellUpdateInfo cellUpdateInfo) {
             if(_cellDictionary.TryGetValue(cellUpdateInfo.Pos,out var cell) == false) {
                 cell = CellPoolMono.Instance.Pop();
                 _cellDictionary.Add(cellUpdateInfo.Pos,cell);
             }
-            cell.Set(_offset,cellUpdateInfo);
+            cell.Set(_boardOffset,cellUpdateInfo);
         }
     }
 }

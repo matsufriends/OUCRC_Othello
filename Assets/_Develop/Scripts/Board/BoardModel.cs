@@ -4,8 +4,8 @@ using System.Linq;
 using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
-namespace OucrcReversi.Reversi {
-    public class ReversiModel : IDisposable {
+namespace OucrcReversi.Board {
+    public class BoardModel : IDisposable {
         private static readonly Vector2Int[] s_dirVec = {
             new(-1,-1)
            ,new(-1,0)
@@ -19,10 +19,14 @@ namespace OucrcReversi.Reversi {
         private readonly CellColor[,] _cellGrid;
         private readonly Subject<CellUpdateInfo> _gridChangedSubject = new();
         private readonly Vector2Int _size;
-        public ReversiModel(Vector2Int size) {
+        public BoardModel(Vector2Int size) {
             if(size.x % 2 != 0 || size.y % 2 != 0) throw new ArgumentException($"サイズが偶数じゃない:({size})");
             _size     = size;
             _cellGrid = new CellColor[size.x,size.y];
+            ForcePut(new Vector2Int(size.x / 2,size.y / 2),CellColor.White);
+            ForcePut(new Vector2Int(size.x / 2 - 1,size.y / 2 - 1),CellColor.White);
+            ForcePut(new Vector2Int(size.x / 2 - 1,size.y / 2),CellColor.Black);
+            ForcePut(new Vector2Int(size.x / 2,size.y / 2 - 1),CellColor.Black);
         }
         public IObservable<CellUpdateInfo> OnGridChanged => _gridChangedSubject;
         void IDisposable.Dispose() => _gridChangedSubject?.Dispose();
