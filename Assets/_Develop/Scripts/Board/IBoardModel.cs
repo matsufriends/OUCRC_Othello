@@ -4,11 +4,11 @@ using OucrcReversi.Cell;
 using UnityEngine;
 namespace OucrcReversi.Board {
     public interface IBoardModel : IDisposable {
-        public IObservable<CellUpdateInfo> OnGridChanged { get; }
-        void InitializeBoard(CellColor[,] board);
+        IObservable<CellUpdateInfo> OnGridChanged { get; }
+        IObservable<IEnumerable<Vector2Int>> OnPlaceablePosChanged { get; }
+        void InitializeBoard(CellColor[,] board,CellColor nextCellColor);
         int GetCellCount();
-        bool TryGetCellColor(Vector2Int   pos,     out CellColor    cellColor);
-        bool TryGetCanPutPosses(CellColor putColor,List<Vector2Int> canPutPosList);
-        bool TryPut(Vector2Int            putPos,  CellColor        putColor);
+        bool TryGetCellColor(Vector2Int pos,out CellColor cellColor);
+        bool TryPut(Vector2Int          putPos);
     }
 }

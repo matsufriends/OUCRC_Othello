@@ -1,7 +1,6 @@
 using DG.Tweening;
 using MornLib.Scenes;
 using OucrcReversi.Network;
-using OucrcReversi.oucrcNet;
 using TMPro;
 using UniRx;
 using UnityEngine;

@@ -10,10 +10,10 @@ namespace OucrcReversi.Cell {
         private void Awake() => _canceller = new MornTaskCanceller(gameObject);
         public void Set(Vector3 offset,CellUpdateInfo updateInfo) {
             _canceller.Cancel();
-            if(updateInfo.AnimOffset == 0) InitAsync(offset,updateInfo).Forget();
+            if(updateInfo.AnimOffset == 0) Init(offset,updateInfo);
             else SetAsync(offset,updateInfo).Forget();
         }
-        private async UniTask InitAsync(Vector3 offset,CellUpdateInfo updateInfo) {
+        private void Init(Vector3 offset,CellUpdateInfo updateInfo) {
             var rand = new Vector3(Random.Range(-c_diff,c_diff),0,Random.Range(-c_diff,c_diff));
             transform.position    = offset + new Vector3(updateInfo.Pos.x,0,-updateInfo.Pos.y) + rand;
             transform.eulerAngles = CellColorToEulerAngles(updateInfo.CellColor);
