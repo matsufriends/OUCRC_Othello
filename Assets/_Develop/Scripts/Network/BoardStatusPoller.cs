@@ -2,11 +2,12 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using OucrcReversi.Board;
+using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Network {
     public sealed class BoardStatusPoller : IDisposable {
+        private readonly string _userId;
         private const int c_maxRoomCount = 5;
-        private const float c_watchInterval = 0.1f;
         private readonly OucrcNetType _oucrcNetType;
         private readonly ValueTuple<int,BoardPresenter>[] _presenters;
         private readonly CancellationTokenSource _tokenSource = new();
@@ -27,7 +28,7 @@ namespace OucrcReversi.Network {
                     var startRoomIndex = Mathf.Max(endRoomIndex - 5,0);
                     for(var i = startRoomIndex;i < endRoomIndex;i++) UpdateRoom(rooms[i],i);
                 }
-                await UniTask.Delay(TimeSpan.FromSeconds(c_watchInterval),cancellationToken: _tokenSource.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
             }
         }
         private BoardPresenter GenerateBoard(int arrayIndex,RoomIdUsersAndBoard room) {
@@ -35,6 +36,18 @@ namespace OucrcReversi.Network {
             offset.x += (room.BoardSize.x + 4) * arrayIndex;
             var view = BoardView3dObjectPoolMono.Instance.Rent();
             view.Init(offset,room.BoardSize,_oucrcNetType);
+            view.OnPut.Subscribe(
+                pos => {
+                    ServerUtility.Instance.PostPutData(
+                        _oucrcNetType,room.id,new PutPostData {
+                            user_id = _userId
+                           ,is_user = true
+                           ,row     = pos.y
+                           ,column  = pos.x
+                        }
+                    ).Forget();
+                }
+            ).AddTo(_tokenSource.Token);
             return new BoardPresenter(new BoardModel(room.BoardSize,room.NextCellColor),view);
         }
         private void UpdateRoom(RoomIdUsersAndBoard room,int roomIndex) {

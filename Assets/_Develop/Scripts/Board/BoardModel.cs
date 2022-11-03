@@ -79,15 +79,19 @@ namespace OucrcReversi.Board {
             _gridChangedSubject.OnNext(new CellUpdateInfo(pos,cellColor,animOffset));
         }
         private void UpdatePlaceablePos() {
-            _placeablePosList.Clear();
+            GetPlaceablePos(_placeablePosList);
+            _placeablePosSubject.OnNext(_placeablePosList);
+        }
+        public void GetPlaceablePos(List<Vector2Int> placeablePosList) {
+            if(placeablePosList == null) return;
+            placeablePosList.Clear();
             if(_nextCellColor != CellColor.None)
                 for(var x = 0;x < _size.y;x++) {
                     for(var y = 0;y < _size.x;y++) {
                         var checkPos = new Vector2Int(x,y);
-                        if(TryGetFlipPosses(checkPos,_nextCellColor,null,true)) _placeablePosList.Add(checkPos);
+                        if(TryGetFlipPosses(checkPos,_nextCellColor,null,true)) placeablePosList.Add(checkPos);
                     }
                 }
-            _placeablePosSubject.OnNext(_placeablePosList);
         }
         private bool TryGetFlipPosses(Vector2Int putPos,CellColor putColor,List<Vector2Int> flipPosList,bool checkCanPutOnly) {
             if(TryGetCellColor(putPos,out var cellColor) == false || cellColor != CellColor.None) return false;
