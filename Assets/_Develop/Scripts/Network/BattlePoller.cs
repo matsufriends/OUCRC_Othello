@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using OucrcReversi.Board;
@@ -7,43 +8,32 @@ using OucrcReversi.Scene;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Network {
-    public sealed class BoardStatusPoller : IDisposable {
+    public sealed class BattlePoller : IDisposable {
         private readonly string _userId;
         private readonly int _maxRoomCount;
         private readonly OucrcNetType _oucrcNetType;
-        private readonly ValueTuple<int,BoardPresenter>[] _presenters;
+        private BoardPresenter _presenter;
         private readonly CancellationTokenSource _tokenSource = new();
         private readonly Vector3 _offset;
-        public BoardStatusPoller(OucrcNetType oucrcNetType,int maxRoomCount,Vector3 offset,string userId) {
+        public BattlePoller(OucrcNetType oucrcNetType,Vector3 offset,string roomId,string userId) {
             _oucrcNetType = oucrcNetType;
             _offset       = offset;
-            _maxRoomCount = maxRoomCount;
             _userId       = userId;
-            _presenters   = new ValueTuple<int,BoardPresenter>[_maxRoomCount];
-            for(var i = 0;i < _maxRoomCount;i++) _presenters[i] = new ValueTuple<int,BoardPresenter>(-1,null);
             GameManagerMono.Instance.OnGetAllRoom.Where(tuple => tuple.Item1 == oucrcNetType).Subscribe(
                 tuple => {
                     var rooms = tuple.Item2;
-                    var endRoomIndex = rooms.Length - 1;
-                    var startRoomIndex = Mathf.Max(endRoomIndex - _maxRoomCount + 1,0);
-                    for(var i = startRoomIndex;i <= endRoomIndex;i++) UpdateRoom(rooms[i],i);
+                    var room = rooms.FirstOrDefault(x => x.id == roomId);
+                    if(room != null) UpdateRoom(room);
                 }
             ).AddTo(_tokenSource.Token);
         }
         public void Dispose() {
-            if(_presenters != null)
-                foreach(var presenter in _presenters) {
-                    presenter.Item2?.Dispose();
-                }
+            _presenter?.Dispose();
             _tokenSource.Cancel();
         }
-        private BoardPresenter GenerateBoard(int arrayIndex,RoomIdUsersAndBoard room) {
-            var offset = new Vector3(0.5f - room.BoardSize.x / 2f,0,-0.5f + room.BoardSize.y / 2f);
-            offset.x += (room.BoardSize.x + 12) * (arrayIndex % 3);
-            offset.z += (room.BoardSize.y + 4) * (arrayIndex / 3);
-            offset   += _offset;
+        private BoardPresenter GenerateBoard(RoomIdUsersAndBoard room) {
             var view = BoardView3dObjectPoolMono.Instance.Rent();
-            view.Init(offset,room.BoardSize,_oucrcNetType,room.black.name,room.white.name,CellColor.None);
+            view.Init(_offset,room.BoardSize,_oucrcNetType,room.black.name,room.white.name,room.black.id == _userId ? CellColor.Black : CellColor.White);
             view.OnPut.Subscribe(
                 pos => {
                     ServerUtility.Instance.PostPlayerPutData(
@@ -58,18 +48,13 @@ namespace OucrcReversi.Network {
             ).AddTo(_tokenSource.Token);
             return new BoardPresenter(new BoardModel(room.BoardSize),view);
         }
-        private void UpdateRoom(RoomIdUsersAndBoard room,int roomIndex) {
-            var arrayIndex = roomIndex % _maxRoomCount;
-            if(_presenters[arrayIndex].Item1 != roomIndex) {
-                _presenters[arrayIndex].Item2?.Dispose();
-                _presenters[arrayIndex] = new ValueTuple<int,BoardPresenter>(roomIndex,GenerateBoard(arrayIndex,room));
-            }
-            var presenter = _presenters[arrayIndex].Item2;
+        private void UpdateRoom(RoomIdUsersAndBoard room) {
+            _presenter ??= GenerateBoard(room);
             var roomCellCount = room.GetCellCount();
-            var presenterCellCount = presenter.GetCellCount();
+            var presenterCellCount = _presenter.GetCellCount();
             if(presenterCellCount == roomCellCount) return;
-            if(presenterCellCount + 1 == roomCellCount) ApplyOnePut(room,presenter);
-            else presenter.InitializeBoard(room.GetGrid(),room.NextCellColor);
+            if(presenterCellCount + 1 == roomCellCount) ApplyOnePut(room,_presenter);
+            else _presenter.InitializeBoard(room.GetGrid(),room.NextCellColor);
         }
         private static void ApplyOnePut(RoomIdUsersAndBoard room,BoardPresenter presenter) {
             var roomGrid = room.GetGrid();

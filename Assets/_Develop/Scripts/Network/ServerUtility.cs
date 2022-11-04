@@ -41,6 +41,17 @@ namespace OucrcReversi.Network {
             };
             await GetRequestTask(request,token);
         }
+        public async UniTask<RoomIdUsersAndBoard> PostMakeBattleRoom(OucrcNetType oucrcNetType,MakeBattleRoomData makeBattleRoomData,CancellationToken token) {
+            if(TryGetUrl(oucrcNetType,out var url) == false) return null;
+            var postData = Encoding.UTF8.GetBytes(JsonMapper.ToJson(makeBattleRoomData));
+            Debug.Log("MakeBattleRoom\n" + JsonMapper.ToJson(makeBattleRoomData));
+            using var request = new UnityWebRequest($"{url}/rooms",UnityWebRequest.kHttpVerbPOST) {
+                uploadHandler   = new UploadHandlerRaw(postData)
+               ,downloadHandler = new DownloadHandlerBuffer()
+            };
+            request.SetRequestHeader("Content-Type","application/json");
+            return await GetRequestTask(request,token) == false ? null : JsonMapper.ToObject<RoomIdUsersAndBoard>(request.downloadHandler.text);
+        }
         public async UniTask<UserInfo> PostRegisterUserOrAi(OucrcNetType         oucrcNetType
                                                            ,bool                 isAi
                                                            ,RegisterUserPostData registerUserPostData
@@ -77,6 +88,7 @@ namespace OucrcReversi.Network {
                ,downloadHandler = new DownloadHandlerBuffer()
             };
             request.SetRequestHeader("Content-Type","application/json");
+            Debug.Log("AAA : " + request.url);
             await GetRequestTask(request,token);
         }
         public async UniTask<UserInfo[]> GetAllUsers(OucrcNetType oucrcNetType,bool isAi,CancellationToken token) {

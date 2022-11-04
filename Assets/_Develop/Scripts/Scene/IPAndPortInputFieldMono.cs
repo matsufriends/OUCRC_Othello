@@ -21,6 +21,7 @@ namespace OucrcReversi.Scene {
                     PlayerPrefs.SetString(_oucrcNetType + c_ipKey,_ipInputField.text);
                     PlayerPrefs.SetString(_oucrcNetType + c_portKey,_portInputField.text);
                     ServerUtility.Instance.SetUrl(_oucrcNetType,GetUrl());
+                    _button.gameObject.SetActive(false);
                 }
             ).AddTo(this);
             UpdateButton();

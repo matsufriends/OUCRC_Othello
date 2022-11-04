@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using MornLib.Singletons;
 using OucrcReversi.Network;
 using UniRx;
+using UnityEngine;
 namespace OucrcReversi.Scene {
     public class GameManagerMono : SingletonMono<GameManagerMono> {
         private readonly Subject<(OucrcNetType,UserInfo[])> _getAllUserSubject = new();
@@ -14,7 +15,7 @@ namespace OucrcReversi.Scene {
         public IObservable<(OucrcNetType,RoomIdUsersAndBoard[])> OnGetAllRoom => _getAllRoomSubject;
         protected override void MyAwake() { }
         private void Start() {
-            var a = new BoardStatusPoller(OucrcNetType.Watch);
+            var a = new BoardStatusPoller(OucrcNetType.Watch,9,new Vector3(-20,0,-12),"");
             var token = gameObject.GetCancellationTokenOnDestroy();
             ServerGetLoop(token).Forget();
         }
@@ -29,13 +30,16 @@ namespace OucrcReversi.Scene {
             }
         }
         private async UniTask GetUserTask(OucrcNetType oucrcNetType,CancellationToken token) {
-            _getAllUserSubject.OnNext((oucrcNetType,await ServerUtility.Instance.GetAllUsers(oucrcNetType,false,token)));
+            var users = await ServerUtility.Instance.GetAllUsers(oucrcNetType,false,token);
+            if(users != null) _getAllUserSubject.OnNext((oucrcNetType,users));
         }
         private async UniTask GetAITask(OucrcNetType oucrcNetType,CancellationToken token) {
-            _getAllAISubject.OnNext((oucrcNetType,await ServerUtility.Instance.GetAllUsers(oucrcNetType,true,token)));
+            var ais = await ServerUtility.Instance.GetAllUsers(oucrcNetType,true,token);
+            if(ais != null) _getAllAISubject.OnNext((oucrcNetType,ais));
         }
         private async UniTask GetRoomTask(OucrcNetType oucrcNetType,CancellationToken token) {
-            _getAllRoomSubject.OnNext((oucrcNetType,await ServerUtility.Instance.GetAllRooms(oucrcNetType,token)));
+            var rooms = await ServerUtility.Instance.GetAllRooms(oucrcNetType,token);
+            if(rooms != null) _getAllRoomSubject.OnNext((oucrcNetType,rooms));
         }
     }
 }

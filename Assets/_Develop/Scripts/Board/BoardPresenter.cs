@@ -14,9 +14,9 @@ namespace OucrcReversi.Board {
             _compositeDisposable.Add(_boardView);
             _boardModel.OnCountChanged.Subscribe(_boardView.UpdateCellCount).AddTo(_compositeDisposable);
             _boardModel.OnGridChanged.Subscribe(_boardView.UpdateCell).AddTo(_compositeDisposable);
-            _boardModel.OnPlaceablePosChanged.Subscribe(_boardView.UpdatePlaceablePos).AddTo(_compositeDisposable);
-            _boardModel.OnPlaceablePosChanged.Subscribe(_boardView.UpdatePlaceablePos).AddTo(_compositeDisposable);
-            _boardView.OnPut.Subscribe(x => _boardModel.TryPut(x)).AddTo(_compositeDisposable);
+            _boardModel.OnPlaceablePosChanged.Subscribe(tuple => _boardView.UpdatePlaceablePos(tuple.Item1,tuple.Item2)).AddTo(_compositeDisposable);
+            _boardModel.OnPlaceablePosChanged.Subscribe(tuple => _boardView.UpdatePlaceablePos(tuple.Item1,tuple.Item2)).AddTo(_compositeDisposable);
+            //_boardView.OnPut.Subscribe(x => _boardModel.TryPut(x)).AddTo(_compositeDisposable);
         }
         public void Dispose() {
             _compositeDisposable.Dispose();

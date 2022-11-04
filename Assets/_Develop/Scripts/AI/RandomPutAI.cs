@@ -21,12 +21,18 @@ namespace OucrcReversi.AI {
         public RandomPutAI(string userId,OucrcNetType oucrcNetType) {
             _userId       = userId;
             _oucrcNetType = oucrcNetType;
-            GameManagerMono.Instance.OnGetAllUser.Where(tuple => tuple.Item1 == oucrcNetType && tuple.Item2 != null).Subscribe(
+            if(oucrcNetType == OucrcNetType.Battle)
+                GameManagerMono.Instance.OnGetAllAI.Where(tuple => tuple.Item1 == oucrcNetType).Subscribe(
+                    tuple => {
+                        _userInfo = tuple.Item2.FirstOrDefault(x => x.id == _userId);
+                    }
+                ).AddTo(_tokenSource.Token);
+            GameManagerMono.Instance.OnGetAllUser.Where(tuple => tuple.Item1 == oucrcNetType).Subscribe(
                 tuple => {
                     _userInfo = tuple.Item2.FirstOrDefault(x => x.id == _userId);
                 }
             ).AddTo(_tokenSource.Token);
-            GameManagerMono.Instance.OnGetAllRoom.Where(tuple => tuple.Item1 == oucrcNetType && tuple.Item2 != null && _userInfo != null).Subscribe(
+            GameManagerMono.Instance.OnGetAllRoom.Where(tuple => tuple.Item1 == oucrcNetType && _userInfo != null).Subscribe(
                 tuple => {
                     _room = tuple.Item2.FirstOrDefault(x => x.id == _userInfo.status);
                 }

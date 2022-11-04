@@ -24,8 +24,8 @@ namespace OucrcReversi.Board {
         private readonly List<Vector2Int> _placeablePosList = new();
         private readonly Subject<(int,int)> _countChangeSubject = new();
         private readonly Subject<CellUpdateInfo> _gridChangedSubject = new();
-        private readonly Subject<IEnumerable<Vector2Int>> _placeablePosSubject = new();
-        public IObservable<IEnumerable<Vector2Int>> OnPlaceablePosChanged => _placeablePosSubject;
+        private readonly Subject<(CellColor,IEnumerable<Vector2Int>)> _placeablePosSubject = new();
+        public IObservable<(CellColor,IEnumerable<Vector2Int>)> OnPlaceablePosChanged => _placeablePosSubject;
         public IObservable<(int,int)> OnCountChanged => _countChangeSubject;
         public IObservable<CellUpdateInfo> OnGridChanged => _gridChangedSubject;
         public BoardModel(Vector2Int size) {
@@ -102,7 +102,11 @@ namespace OucrcReversi.Board {
         }
         private void UpdatePlaceablePos() {
             GetPlaceablePos(_placeablePosList);
-            _placeablePosSubject.OnNext(_placeablePosList);
+            if(_placeablePosList.Count == 0) {
+                _nextCellColor = CellColorEx.GetOpposite(_nextCellColor);
+                GetPlaceablePos(_placeablePosList);
+            }
+            _placeablePosSubject.OnNext((_nextCellColor,_placeablePosList));
         }
         public void GetPlaceablePos(List<Vector2Int> placeablePosList) {
             if(placeablePosList == null) return;

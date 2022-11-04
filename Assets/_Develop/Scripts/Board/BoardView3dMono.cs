@@ -15,6 +15,8 @@ namespace OucrcReversi.Board {
         [SerializeField] private TextMeshPro _whiteUserName;
         [SerializeField] private TextMeshPro _blackCount;
         [SerializeField] private TextMeshPro _whiteCount;
+        [SerializeField] private GameObject _blackTurn;
+        [SerializeField] private GameObject _whiteTurn;
         [Header("Scaler")] [SerializeField] private Transform _fieldGreen;
         [SerializeField] private Transform _line;
         [SerializeField] private SpriteRenderer _lineRenderer;
@@ -24,12 +26,15 @@ namespace OucrcReversi.Board {
         [SerializeField] private Transform _right;
         private readonly Dictionary<Vector2Int,CellMono> _cellDictionary = new();
         private readonly Subject<Vector2Int> _onPutSubject = new();
+        private CellColor _playerColor;
+        private CellColor _lastPlaceableColor;
         private static readonly int s_tiling = Shader.PropertyToID("_Tiling");
         public IObservable<Vector2Int> OnPut => _onPutSubject;
-        public void Init(Vector3 boardOffset,Vector2Int size,OucrcNetType oucrcNetType,string blackUserName,string whiteUserName) {
+        public void Init(Vector3 boardOffset,Vector2Int size,OucrcNetType oucrcNetType,string blackUserName,string whiteUserName,CellColor playerColor) {
             _blackUserName.text = blackUserName;
             _whiteUserName.text = whiteUserName;
             transform.position  = boardOffset;
+            _playerColor        = playerColor;
             var center = new Vector3(size.x / 2f - 0.5f,0,-(size.y / 2f - 0.5f));
             _fieldGreen.localPosition = center + new Vector3(0,_fieldGreen.localPosition.y,0);
             _fieldGreen.localScale    = new Vector3(size.x + 1,_fieldGreen.localScale.y,size.y + 1);
@@ -45,7 +50,7 @@ namespace OucrcReversi.Board {
             _right.localPosition = center + new Vector3(size.x / 2f + 0.75f,_right.localPosition.y,0);
             _right.localScale    = new Vector3(0.5f,1.1f,size.y + 2f);
             if(oucrcNetType == OucrcNetType.Watch) return;
-            Observable.EveryUpdate().Where(_ => Input.GetMouseButtonDown(0)).Subscribe(
+            Observable.EveryUpdate().Where(_ => _lastPlaceableColor == _playerColor && Input.GetMouseButtonDown(0)).Subscribe(
                 _ => {
                     var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
                     if(Physics.Raycast(mouseRay,out var hit,100,_fieldLayerMask)) {
@@ -73,8 +78,12 @@ namespace OucrcReversi.Board {
             }
             cell.Set(transform.position,cellUpdateInfo);
         }
-        public void UpdatePlaceablePos(IEnumerable<Vector2Int> placeablePosses) {
+        public void UpdatePlaceablePos(CellColor cellColor,IEnumerable<Vector2Int> placeablePosses) {
             _markerParent.DestroyChildren();
+            _lastPlaceableColor = cellColor;
+            _blackTurn.SetActive(cellColor == CellColor.Black);
+            _whiteTurn.SetActive(cellColor == CellColor.White);
+            if(_playerColor != CellColor.None && cellColor != _playerColor) return;
             foreach(var pos in placeablePosses) {
                 var marker = MarkerObjectPoolMono.Instance.Rent();
                 marker.transform.position = transform.position + new Vector3(pos.x,0,-pos.y);

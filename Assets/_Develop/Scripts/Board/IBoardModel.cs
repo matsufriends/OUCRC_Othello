@@ -6,7 +6,7 @@ namespace OucrcReversi.Board {
     public interface IBoardModel : IDisposable {
         IObservable<(int,int)> OnCountChanged { get; }
         IObservable<CellUpdateInfo> OnGridChanged { get; }
-        IObservable<IEnumerable<Vector2Int>> OnPlaceablePosChanged { get; }
+        IObservable<(CellColor,IEnumerable<Vector2Int>)> OnPlaceablePosChanged { get; }
         void InitializeBoard(CellColor[,] board,CellColor nextCellColor);
         int GetCellCount();
         bool TryGetCellColor(Vector2Int pos,out CellColor cellColor);
