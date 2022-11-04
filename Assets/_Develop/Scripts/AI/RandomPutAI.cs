@@ -29,25 +29,27 @@ namespace OucrcReversi.AI {
                           )).id;
             while(true) {
                 var userInfo = await ServerUtility.Instance.GetUser(_oucrcNetType,userId,_tokenSource.Token);
-                var room = await ServerUtility.Instance.GetRoom(_oucrcNetType,userInfo.id,_tokenSource.Token);
-                if(room != null)
-                    if(room.next.id == userInfo.id) {
-                        var color = room.black.id == room.next.id ? CellColor.Black : CellColor.White;
-                        var model = new BoardModel(room.BoardSize,color);
-                        model.InitializeBoard(room.GetGrid(),color);
-                        model.GetPlaceablePos(_placeablePosList);
-                        if(_placeablePosList.Count > 0) {
-                            var pos = _placeablePosList.RandomValue();
-                            await ServerUtility.Instance.PostPutData(
-                                _oucrcNetType,room.id,new PutPostData {
-                                    user_id = userId
-                                   ,is_user = false
-                                   ,row     = pos.y
-                                   ,column  = pos.x
-                                }
-                            );
+                if(userInfo != null) {
+                    var room = await ServerUtility.Instance.GetRoom(_oucrcNetType,userInfo.id,_tokenSource.Token);
+                    if(room != null)
+                        if(room.next.id == userInfo.id) {
+                            var color = room.black.id == room.next.id ? CellColor.Black : CellColor.White;
+                            var model = new BoardModel(room.BoardSize,color);
+                            model.InitializeBoard(room.GetGrid(),color);
+                            model.GetPlaceablePos(_placeablePosList);
+                            if(_placeablePosList.Count > 0) {
+                                var pos = _placeablePosList.RandomValue();
+                                await ServerUtility.Instance.PostPutData(
+                                    _oucrcNetType,room.id,new PutPostData {
+                                        user_id = userId
+                                       ,is_user = false
+                                       ,row     = pos.y
+                                       ,column  = pos.x
+                                    }
+                                );
+                            }
                         }
-                    }
+                }
                 await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
             }
         }

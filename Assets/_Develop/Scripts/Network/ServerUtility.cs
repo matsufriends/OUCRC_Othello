@@ -65,7 +65,19 @@ namespace OucrcReversi.Network {
                 return null;
             }
             return JsonMapper.ToObject<UserInfo>(request.downloadHandler.text);
-            ;
+        }
+        public async UniTask<UserInfo[]> GetAllUsers(OucrcNetType oucrcNetType,CancellationToken token) {
+            var url = GetUrl(oucrcNetType);
+            using var request = UnityWebRequest.Get($"{url}/users");
+            try {
+                await request.SendWebRequest().ToUniTask(cancellationToken: token).Timeout(TimeSpan.FromSeconds(3));
+            } catch(Exception) {
+                return null;
+            }
+            if(request.result != UnityWebRequest.Result.Success) return null;
+            var tex = $"{{\"users\":{request.downloadHandler.text}}}";
+            var allRoomInfo = JsonMapper.ToObject<AllUserInfo>(tex);
+            return allRoomInfo.users;
         }
         public async UniTask<RoomIdUsersAndBoard> GetRoom(OucrcNetType oucrcNetType,string roomId,CancellationToken token) {
             var url = GetUrl(oucrcNetType);
