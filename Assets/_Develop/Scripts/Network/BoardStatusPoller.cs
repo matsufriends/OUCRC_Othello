@@ -44,7 +44,7 @@ namespace OucrcReversi.Network {
                            ,is_user = true
                            ,row     = pos.y
                            ,column  = pos.x
-                        }
+                        },_tokenSource.Token
                     ).Forget();
                 }
             ).AddTo(_tokenSource.Token);

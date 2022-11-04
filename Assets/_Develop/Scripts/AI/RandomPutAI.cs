@@ -25,7 +25,7 @@ namespace OucrcReversi.AI {
             var userId = (await ServerUtility.Instance.PostRegisterUser(
                               _oucrcNetType,new RegisterUserPostData {
                                   user_name = _userName
-                              }
+                              },_tokenSource.Token
                           )).id;
             while(true) {
                 var userInfo = await ServerUtility.Instance.GetUser(_oucrcNetType,userId,_tokenSource.Token);
@@ -45,7 +45,7 @@ namespace OucrcReversi.AI {
                                        ,is_user = false
                                        ,row     = pos.y
                                        ,column  = pos.x
-                                    }
+                                    },_tokenSource.Token
                                 );
                             }
                         }
