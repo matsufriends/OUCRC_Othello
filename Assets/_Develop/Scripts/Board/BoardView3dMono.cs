@@ -13,6 +13,8 @@ namespace OucrcReversi.Board {
         [SerializeField] private Transform _markerParent;
         [Header("UI")] [SerializeField] private TextMeshPro _blackUserName;
         [SerializeField] private TextMeshPro _whiteUserName;
+        [SerializeField] private TextMeshPro _blackCount;
+        [SerializeField] private TextMeshPro _whiteCount;
         [Header("Scaler")] [SerializeField] private Transform _fieldGreen;
         [SerializeField] private Transform _line;
         [SerializeField] private SpriteRenderer _lineRenderer;
@@ -59,6 +61,10 @@ namespace OucrcReversi.Board {
                 CellObjectPoolMono.Instance.Return(value);
             }
             Destroy(gameObject);
+        }
+        public void UpdateCellCount((int,int) cellCounts) {
+            _blackCount.text = cellCounts.Item1.ToString();
+            _whiteCount.text = cellCounts.Item2.ToString();
         }
         public void UpdateCell(CellUpdateInfo cellUpdateInfo) {
             if(_cellDictionary.TryGetValue(cellUpdateInfo.Pos,out var cell) == false) {

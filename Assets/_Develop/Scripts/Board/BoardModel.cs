@@ -22,11 +22,13 @@ namespace OucrcReversi.Board {
         private CellColor _nextCellColor;
         private readonly CellColor[,] _cellGrid;
         private readonly List<Vector2Int> _placeablePosList = new();
+        private readonly Subject<(int,int)> _countChangeSubject = new();
         private readonly Subject<CellUpdateInfo> _gridChangedSubject = new();
         private readonly Subject<IEnumerable<Vector2Int>> _placeablePosSubject = new();
         public IObservable<IEnumerable<Vector2Int>> OnPlaceablePosChanged => _placeablePosSubject;
+        public IObservable<(int,int)> OnCountChanged => _countChangeSubject;
         public IObservable<CellUpdateInfo> OnGridChanged => _gridChangedSubject;
-        public BoardModel(Vector2Int size,CellColor nextCellColor) {
+        public BoardModel(Vector2Int size) {
             if(size.x % 2 != 0 || size.y % 2 != 0) throw new ArgumentException($"サイズが偶数じゃない:({size})");
             _size          = size;
             _cellGrid      = new CellColor[size.x,size.y];
@@ -41,12 +43,15 @@ namespace OucrcReversi.Board {
                     ChangeCell(new Vector2Int(x,y),board[x,y],0);
                 }
             }
-            Log();
             _nextCellColor = nextCellColor;
+            _countChangeSubject.OnNext((GetCellCount(CellColor.Black),GetCellCount(CellColor.White)));
             UpdatePlaceablePos();
         }
         public void Dispose() {
             _gridChangedSubject?.Dispose();
+        }
+        private int GetCellCount(CellColor cellColor) {
+            return _cellGrid.Cast<CellColor>().Count(x => x == cellColor);
         }
         public int GetCellCount() {
             return _cellGrid.Cast<CellColor>().Count(cellColor => cellColor != CellColor.None);
@@ -75,6 +80,7 @@ namespace OucrcReversi.Board {
                 ChangeCell(flipPos,cellColor,animOffset);
             }
             _nextCellColor = CellColorEx.GetOpposite(cellColor);
+            _countChangeSubject.OnNext((GetCellCount(CellColor.Black),GetCellCount(CellColor.White)));
             UpdatePlaceablePos();
             return true;
         }

@@ -4,6 +4,7 @@ using OucrcReversi.Cell;
 using UnityEngine;
 namespace OucrcReversi.Board {
     public interface IBoardModel : IDisposable {
+        IObservable<(int,int)> OnCountChanged { get; }
         IObservable<CellUpdateInfo> OnGridChanged { get; }
         IObservable<IEnumerable<Vector2Int>> OnPlaceablePosChanged { get; }
         void InitializeBoard(CellColor[,] board,CellColor nextCellColor);

@@ -63,7 +63,6 @@ namespace OucrcReversi.Network {
             if(roomId == null) return;
             if(TryGetUrl(oucrcNetType,out var url) == false) return;
             var postData = Encoding.UTF8.GetBytes(JsonMapper.ToJson(aiPutPostData));
-            Debug.Log($"{url}/rooms/{roomId} \n {JsonMapper.ToJson(aiPutPostData)}");
             using var request = new UnityWebRequest($"{url}/rooms/{roomId}",UnityWebRequest.kHttpVerbPOST) {
                 uploadHandler   = new UploadHandlerRaw(postData)
                ,downloadHandler = new DownloadHandlerBuffer()
@@ -75,7 +74,6 @@ namespace OucrcReversi.Network {
             if(roomId == null) return;
             if(TryGetUrl(oucrcNetType,out var url) == false) return;
             var postData = Encoding.UTF8.GetBytes(JsonMapper.ToJson(aiPutPostData));
-            Debug.Log($"{url}/rooms/{roomId} \n {JsonMapper.ToJson(aiPutPostData)}");
             using var request = new UnityWebRequest($"{url}/rooms/{roomId}",UnityWebRequest.kHttpVerbPOST) {
                 uploadHandler   = new UploadHandlerRaw(postData)
                ,downloadHandler = new DownloadHandlerBuffer()
@@ -130,7 +128,6 @@ namespace OucrcReversi.Network {
             if(roomId == null) return null;
             if(TryGetUrl(oucrcNetType,out var url) == false) return null;
             using var request = UnityWebRequest.Get($"{url}/rooms/{roomId}");
-            Debug.Log($"{url}/rooms/{roomId}");
             try {
                 await request.SendWebRequest().ToUniTask(cancellationToken: token).Timeout(TimeSpan.FromSeconds(c_timeOutTime));
             } catch(Exception e) {

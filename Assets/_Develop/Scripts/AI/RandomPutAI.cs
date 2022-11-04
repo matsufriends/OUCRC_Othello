@@ -26,10 +26,10 @@ namespace OucrcReversi.AI {
                 var userInfo = await ServerUtility.Instance.GetUser(_oucrcNetType,_userId,_tokenSource.Token);
                 if(userInfo != null) {
                     var room = await ServerUtility.Instance.GetRoom(_oucrcNetType,userInfo.status,_tokenSource.Token);
-                    if(room != null)
+                    if(room != null && room.next != null)
                         if(room.next.id == userInfo.id) {
                             var color = room.black.id == room.next.id ? CellColor.Black : CellColor.White;
-                            var model = new BoardModel(room.BoardSize,color);
+                            var model = new BoardModel(room.BoardSize);
                             model.InitializeBoard(room.GetGrid(),color);
                             model.GetPlaceablePos(_placeablePosList);
                             if(_placeablePosList.Count > 0) {
@@ -44,7 +44,8 @@ namespace OucrcReversi.AI {
                             }
                         }
                 }
-                await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
+                await UniTask.Yield(_tokenSource.Token);
+                //await UniTask.Delay(TimeSpan.FromSeconds(Random.Range(2,5)),cancellationToken: _tokenSource.Token);
             }
         }
     }

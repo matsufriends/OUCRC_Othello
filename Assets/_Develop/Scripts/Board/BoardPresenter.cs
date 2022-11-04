@@ -12,6 +12,7 @@ namespace OucrcReversi.Board {
             _boardView  = boardView;
             _compositeDisposable.Add(_boardModel);
             _compositeDisposable.Add(_boardView);
+            _boardModel.OnCountChanged.Subscribe(_boardView.UpdateCellCount).AddTo(_compositeDisposable);
             _boardModel.OnGridChanged.Subscribe(_boardView.UpdateCell).AddTo(_compositeDisposable);
             _boardModel.OnPlaceablePosChanged.Subscribe(_boardView.UpdatePlaceablePos).AddTo(_compositeDisposable);
             _boardModel.OnPlaceablePosChanged.Subscribe(_boardView.UpdatePlaceablePos).AddTo(_compositeDisposable);

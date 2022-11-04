@@ -13,6 +13,9 @@ namespace OucrcReversi.Scene {
         [Header("Animation")] [SerializeField] private RectTransform _rect;
         [SerializeField] private Vector2 _hidePos;
         [SerializeField] private Vector2 _showPos;
+        [SerializeField] private RectTransform _showHideButton;
+        [SerializeField] private float _openHeight;
+        [SerializeField] private float _closeHeight;
         [SerializeField] private float _duration;
         [Header("UI")] [SerializeField] private Button _barToggleButton;
         [SerializeField] private TMP_InputField _watchUserNameInputField;
@@ -36,6 +39,8 @@ namespace OucrcReversi.Scene {
                     _isActive = !_isActive;
                     _rect.DOComplete();
                     _rect.DOAnchorPos(_isActive ? _showPos : _hidePos,_duration);
+                    _showHideButton.DOComplete();
+                    _showHideButton.DOSizeDelta(new Vector2(_showHideButton.sizeDelta.x,_isActive ? _closeHeight : _openHeight),_duration);
                 }
             ).AddTo(this);
             var token = gameObject.GetCancellationTokenOnDestroy();
