@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using OucrcReversi.Board;
 using OucrcReversi.Cell;
+using OucrcReversi.Scene;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Network {
@@ -16,22 +17,17 @@ namespace OucrcReversi.Network {
             _oucrcNetType = oucrcNetType;
             _presenters   = new ValueTuple<int,BoardPresenter>[c_maxRoomCount];
             for(var i = 0;i < c_maxRoomCount;i++) _presenters[i] = new ValueTuple<int,BoardPresenter>(-1,null);
-            WatchLoopTask().Forget();
-        }
-        public void Dispose() {
-            _tokenSource.Cancel();
-        }
-        private async UniTask WatchLoopTask() {
-            while(true) {
-                var rooms = await ServerUtility.Instance.GetAllRooms(_oucrcNetType,_tokenSource.Token);
-                if(rooms != null) {
+            GameManagerMono.Instance.OnGetAllRoom.Where(tuple => tuple.Item1 == oucrcNetType && tuple.Item2 != null).Subscribe(
+                tuple => {
+                    var rooms = tuple.Item2;
                     var endRoomIndex = rooms.Length - 1;
                     var startRoomIndex = Mathf.Max(endRoomIndex - c_maxRoomCount + 1,0);
                     for(var i = startRoomIndex;i <= endRoomIndex;i++) UpdateRoom(rooms[i],i);
                 }
-                await UniTask.Yield(_tokenSource.Token);
-                //await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
-            }
+            ).AddTo(_tokenSource.Token);
+        }
+        public void Dispose() {
+            _tokenSource.Cancel();
         }
         private BoardPresenter GenerateBoard(int arrayIndex,RoomIdUsersAndBoard room) {
             var offset = new Vector3(0.5f - room.BoardSize.x / 2f,0,-0.5f + room.BoardSize.y / 2f);

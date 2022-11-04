@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MornLib.Scenes;
 using OucrcReversi.Network;
-using TMPro;
 using UniRx;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 namespace OucrcReversi.Scene {
@@ -18,14 +17,8 @@ namespace OucrcReversi.Scene {
         [SerializeField] private float _closeHeight;
         [SerializeField] private float _duration;
         [Header("UI")] [SerializeField] private Button _barToggleButton;
-        [SerializeField] private TMP_InputField _watchUserNameInputField;
-        [SerializeField] private Button _watchUserNameSetButton;
         [SerializeField] private Button _forceRefreshRoomsButton;
-        [SerializeField] private TMP_InputField _battleUserNameInputField;
-        [SerializeField] private Button _battleNameSetButton;
-        [SerializeField] private Button _addAiButton;
         [SerializeField] private UserIdAndNameItemMono _userIdAndNameItemPrefab;
-        [SerializeField] private AiIdItemMono _aiIdItemPrefab;
         [SerializeField] private Transform _watchUserParent;
         [SerializeField] private Transform _battleUserParent;
         [SerializeField] private Transform _aiIdParent;
@@ -34,6 +27,7 @@ namespace OucrcReversi.Scene {
         private readonly HashSet<string> _aiIdHash = new();
         private bool _isActive;
         private void Awake() {
+            NativeLeakDetection.Mode = NativeLeakDetectionMode.Disabled;
             _barToggleButton.OnClickAsObservable().Subscribe(
                 _ => {
                     _isActive = !_isActive;
@@ -44,56 +38,30 @@ namespace OucrcReversi.Scene {
                 }
             ).AddTo(this);
             var token = gameObject.GetCancellationTokenOnDestroy();
-            _watchUserNameSetButton.OnClickAsObservable().Subscribe(
-                _ => ServerUtility.Instance.PostRegisterUser(
-                    OucrcNetType.Watch,new RegisterUserPostData {
-                        user_name = _watchUserNameInputField.text
-                    },token
-                ).Forget()
-            ).AddTo(this);
             _forceRefreshRoomsButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.PostRefreshRoom(OucrcNetType.Watch,token).Forget())
                                     .AddTo(this);
-            _battleNameSetButton.OnClickAsObservable().Subscribe(
-                _ => ServerUtility.Instance.PostRegisterUser(
-                    OucrcNetType.Battle,new RegisterUserPostData {
-                        user_name = _battleUserNameInputField.text
-                    },token
-                ).Forget()
-            ).AddTo(this);
-            _addAiButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.PostRegisterAi(OucrcNetType.Battle,token).Forget()).AddTo(this);
-            CheckLoop().Forget();
-        }
-        private async UniTask CheckLoop() {
-            var token = gameObject.GetCancellationTokenOnDestroy();
-            while(true) {
-                var watchUsers = await ServerUtility.Instance.GetAllUsers(OucrcNetType.Watch,token);
-                var ais = await ServerUtility.Instance.GetAllAIs(OucrcNetType.Battle,token);
-                //var battleUsers = await ServerUtility.Instance.GetAllUsers(OucrcNetType.Battle,token);
-                if(watchUsers != null)
-                    foreach(var user in watchUsers) {
-                        if(_watchUserHash.Add(user.id)) {
-                            var prefab = Instantiate(_userIdAndNameItemPrefab,_watchUserParent);
-                            prefab.Init(user.id,user.name);
-                        }
-                    }
-                if(ais != null)
-                    foreach(var ai in ais) {
+            GameManagerMono.Instance.OnGetAllAI.Where(tuple => tuple.Item2 != null).Subscribe(
+                tuple => {
+                    foreach(var ai in tuple.Item2) {
                         if(_aiIdHash.Add(ai.id)) {
-                            var prefab = Instantiate(_aiIdItemPrefab,_aiIdParent);
-                            prefab.Init(ai.id);
+                            var prefab = Instantiate(_userIdAndNameItemPrefab,_aiIdParent);
+                            prefab.Init(ai.id,ai.name);
                         }
                     }
-                /*
-                if(battleUsers != null)
-                    foreach(var user in battleUsers) {
-                        if(_battleUserHash.Add(user.id)) {
-                            var prefab = Instantiate(_userIdAndNameItemPrefab,_battleUserParent);
+                }
+            ).AddTo(this);
+            GameManagerMono.Instance.OnGetAllUser.Where(tuple => tuple.Item2 != null).Subscribe(
+                tuple => {
+                    var hash = tuple.Item1 == OucrcNetType.Watch ? _watchUserHash : _battleUserHash;
+                    var parent = tuple.Item1 == OucrcNetType.Watch ? _watchUserParent : _battleUserParent;
+                    foreach(var user in tuple.Item2) {
+                        if(hash.Add(user.id)) {
+                            var prefab = Instantiate(_userIdAndNameItemPrefab,parent);
                             prefab.Init(user.id,user.name);
                         }
                     }
-                    */
-                await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: token);
-            }
+                }
+            ).AddTo(this);
         }
     }
 }
