@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MornLib.Cores;
+using MornLib.Pool;
 using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
@@ -39,6 +41,7 @@ namespace OucrcReversi.Board {
                     ChangeCell(new Vector2Int(x,y),board[x,y],0);
                 }
             }
+            Log();
             _nextCellColor = nextCellColor;
             UpdatePlaceablePos();
         }
@@ -60,17 +63,30 @@ namespace OucrcReversi.Board {
             return true;
         }
         public bool TryPut(Vector2Int putPos) {
+            return TryPut(putPos,_nextCellColor);
+        }
+        public bool TryPut(Vector2Int putPos,CellColor cellColor) {
             var flipPosList = new List<Vector2Int>();
-            if(TryGetFlipPosses(putPos,_nextCellColor,flipPosList,false) == false) return false;
-            ChangeCell(putPos,_nextCellColor,0);
+            if(TryGetFlipPosses(putPos,cellColor,flipPosList,false) == false) return false;
+            ChangeCell(putPos,cellColor,0);
             foreach(var flipPos in flipPosList) {
                 var dif = putPos - flipPos;
                 var animOffset = Mathf.Max(Mathf.Abs(dif.x),Mathf.Abs(dif.y));
-                ChangeCell(flipPos,_nextCellColor,animOffset);
+                ChangeCell(flipPos,cellColor,animOffset);
             }
-            _nextCellColor = CellColorEx.GetOpposite(_nextCellColor);
+            _nextCellColor = CellColorEx.GetOpposite(cellColor);
             UpdatePlaceablePos();
             return true;
+        }
+        public void Log() {
+            var builder = MornSharedObjectPool<MornStringBuilder>.Rent();
+            builder.Init(',');
+            for(var y = 0;y < _size.y;y++) {
+                for(var x = 0;x < _size.x;x++) builder.Append(_cellGrid[x,y].ToString());
+                builder.Append("\n");
+            }
+            Debug.Log(builder.Get());
+            MornSharedObjectPool<MornStringBuilder>.Return(builder);
         }
         private void ChangeCell(Vector2Int pos,CellColor cellColor,int animOffset) {
             if(IsInner(pos) == false) throw new ArgumentException("配列の範囲外です");

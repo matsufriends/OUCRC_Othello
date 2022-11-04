@@ -15,13 +15,9 @@ namespace OucrcReversi.Scene {
         [SerializeField] private Vector2 _showPos;
         [SerializeField] private float _duration;
         [Header("UI")] [SerializeField] private Button _barToggleButton;
-        [SerializeField] private TMP_InputField _watchUrlInputField;
-        [SerializeField] private Button _watchUrlSetButton;
         [SerializeField] private TMP_InputField _watchUserNameInputField;
         [SerializeField] private Button _watchUserNameSetButton;
         [SerializeField] private Button _forceRefreshRoomsButton;
-        [SerializeField] private TMP_InputField _battleUrlInputField;
-        [SerializeField] private Button _battleUrlSetButton;
         [SerializeField] private TMP_InputField _battleUserNameInputField;
         [SerializeField] private Button _battleNameSetButton;
         [SerializeField] private Button _addAiButton;
@@ -43,7 +39,6 @@ namespace OucrcReversi.Scene {
                 }
             ).AddTo(this);
             var token = gameObject.GetCancellationTokenOnDestroy();
-            _watchUrlSetButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.SetUrl(OucrcNetType.Watch,_watchUrlInputField.text)).AddTo(this);
             _watchUserNameSetButton.OnClickAsObservable().Subscribe(
                 _ => ServerUtility.Instance.PostRegisterUser(
                     OucrcNetType.Watch,new RegisterUserPostData {
@@ -61,7 +56,6 @@ namespace OucrcReversi.Scene {
                 ).Forget()
             ).AddTo(this);
             _addAiButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.PostRegisterAi(OucrcNetType.Battle,token).Forget()).AddTo(this);
-            _battleUrlSetButton.OnClickAsObservable().Subscribe(_ => ServerUtility.Instance.SetUrl(OucrcNetType.Battle,_battleUrlInputField.text)).AddTo(this);
             CheckLoop().Forget();
         }
         private async UniTask CheckLoop() {
@@ -69,7 +63,7 @@ namespace OucrcReversi.Scene {
             while(true) {
                 var watchUsers = await ServerUtility.Instance.GetAllUsers(OucrcNetType.Watch,token);
                 var ais = await ServerUtility.Instance.GetAllAIs(OucrcNetType.Battle,token);
-                var battleUsers = await ServerUtility.Instance.GetAllUsers(OucrcNetType.Battle,token);
+                //var battleUsers = await ServerUtility.Instance.GetAllUsers(OucrcNetType.Battle,token);
                 if(watchUsers != null)
                     foreach(var user in watchUsers) {
                         if(_watchUserHash.Add(user.id)) {
@@ -84,6 +78,7 @@ namespace OucrcReversi.Scene {
                             prefab.Init(ai.id);
                         }
                     }
+                /*
                 if(battleUsers != null)
                     foreach(var user in battleUsers) {
                         if(_battleUserHash.Add(user.id)) {
@@ -91,6 +86,7 @@ namespace OucrcReversi.Scene {
                             prefab.Init(user.id,user.name);
                         }
                     }
+                    */
                 await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: token);
             }
         }

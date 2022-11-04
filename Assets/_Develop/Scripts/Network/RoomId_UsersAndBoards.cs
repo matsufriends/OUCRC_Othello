@@ -14,7 +14,7 @@ namespace OucrcReversi.Network {
         public UserInfo next;
         public int[][] board;
         public Vector2Int BoardSize => new(board[0].Length,board.Length);
-        public CellColor NextCellColor => next.id == black.id ? CellColor.Black : CellColor.White;
+        public CellColor NextCellColor => next == null ? CellColor.None : next.id == black.id ? CellColor.Black : CellColor.White;
         public int GetCellCount() {
             return board.Sum(row => row.Count(color => color is 1 or 2));
         }

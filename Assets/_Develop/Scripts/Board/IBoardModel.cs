@@ -10,5 +10,7 @@ namespace OucrcReversi.Board {
         int GetCellCount();
         bool TryGetCellColor(Vector2Int pos,out CellColor cellColor);
         bool TryPut(Vector2Int          putPos);
+        bool TryPut(Vector2Int          putPos,CellColor cellColor);
+        void Log();
     }
 }

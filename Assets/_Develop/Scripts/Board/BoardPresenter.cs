@@ -29,8 +29,11 @@ namespace OucrcReversi.Board {
         public bool TryGetCellColor(Vector2Int pos,out CellColor cellColor) {
             return _boardModel.TryGetCellColor(pos,out cellColor);
         }
-        public bool TryPut(Vector2Int putPos) {
-            return _boardModel.TryPut(putPos);
+        public bool TryPut(Vector2Int putPos,CellColor cellColor) {
+            return _boardModel.TryPut(putPos,cellColor);
+        }
+        public void Log() {
+            _boardModel.Log();
         }
     }
 }

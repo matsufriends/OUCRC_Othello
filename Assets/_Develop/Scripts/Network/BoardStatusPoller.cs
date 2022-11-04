@@ -2,6 +2,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using OucrcReversi.Board;
+using OucrcReversi.Cell;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Network {
@@ -25,8 +26,8 @@ namespace OucrcReversi.Network {
                 var rooms = await ServerUtility.Instance.GetAllRooms(_oucrcNetType,_tokenSource.Token);
                 if(rooms != null) {
                     var endRoomIndex = rooms.Length - 1;
-                    var startRoomIndex = Mathf.Max(endRoomIndex - 5,0);
-                    for(var i = startRoomIndex;i < endRoomIndex;i++) UpdateRoom(rooms[i],i);
+                    var startRoomIndex = Mathf.Max(endRoomIndex - c_maxRoomCount + 1,0);
+                    for(var i = startRoomIndex;i <= endRoomIndex;i++) UpdateRoom(rooms[i],i);
                 }
                 await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
             }
@@ -35,11 +36,11 @@ namespace OucrcReversi.Network {
             var offset = new Vector3(0.5f - room.BoardSize.x / 2f,0,-0.5f + room.BoardSize.y / 2f);
             offset.x += (room.BoardSize.x + 4) * arrayIndex;
             var view = BoardView3dObjectPoolMono.Instance.Rent();
-            view.Init(offset,room.BoardSize,_oucrcNetType);
+            view.Init(offset,room.BoardSize,_oucrcNetType,room.black.name,room.white.name);
             view.OnPut.Subscribe(
                 pos => {
-                    ServerUtility.Instance.PostPutData(
-                        _oucrcNetType,room.id,new PutPostData {
+                    ServerUtility.Instance.PostPlayerPutData(
+                        _oucrcNetType,room.id,new PlayerPutPostData {
                             user_id = _userId
                            ,is_user = true
                            ,row     = pos.y
@@ -60,6 +61,9 @@ namespace OucrcReversi.Network {
             var roomCellCount = room.GetCellCount();
             var presenterCellCount = presenter.GetCellCount();
             if(presenterCellCount == roomCellCount) return;
+            Debug.Log(presenterCellCount + "  " + roomCellCount);
+            presenter.Log();
+            room.Log();
             if(presenterCellCount + 1 == roomCellCount) ApplyOnePut(room,presenter);
             else presenter.InitializeBoard(room.GetGrid(),room.NextCellColor);
         }
@@ -68,8 +72,10 @@ namespace OucrcReversi.Network {
             for(var y = 0;y < room.BoardSize.y;y++) {
                 for(var x = 0;x < room.BoardSize.x;x++) {
                     var pos = new Vector2Int(x,y);
-                    if(presenter.TryGetCellColor(pos,out var cellColor) && cellColor != roomGrid[x,y]) {
-                        presenter.TryPut(pos);
+                    if(presenter.TryGetCellColor(pos,out var cellColor) && cellColor == CellColor.None && roomGrid[x,y] != CellColor.None) {
+                        if(presenter.TryPut(pos,roomGrid[x,y])) return;
+                        Debug.Log("なんでやねん" + pos + " " + roomGrid[x,y]);
+                        presenter.InitializeBoard(roomGrid,room.NextCellColor);
                         return;
                     }
                 }

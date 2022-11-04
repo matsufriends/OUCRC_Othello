@@ -4,12 +4,15 @@ using MornLib.Extensions;
 using OucrcReversi.Cell;
 using OucrcReversi.Marker;
 using OucrcReversi.Network;
+using TMPro;
 using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Board {
     public sealed class BoardView3dMono : MonoBehaviour,IBoardView {
         [SerializeField] private LayerMask _fieldLayerMask;
         [SerializeField] private Transform _markerParent;
+        [Header("UI")] [SerializeField] private TextMeshPro _blackUserName;
+        [SerializeField] private TextMeshPro _whiteUserName;
         [Header("Scaler")] [SerializeField] private Transform _fieldGreen;
         [SerializeField] private Transform _line;
         [SerializeField] private SpriteRenderer _lineRenderer;
@@ -21,8 +24,10 @@ namespace OucrcReversi.Board {
         private readonly Subject<Vector2Int> _onPutSubject = new();
         private static readonly int s_tiling = Shader.PropertyToID("_Tiling");
         public IObservable<Vector2Int> OnPut => _onPutSubject;
-        public void Init(Vector3 boardOffset,Vector2Int size,OucrcNetType oucrcNetType) {
-            transform.position = boardOffset;
+        public void Init(Vector3 boardOffset,Vector2Int size,OucrcNetType oucrcNetType,string blackUserName,string whiteUserName) {
+            _blackUserName.text = blackUserName;
+            _whiteUserName.text = whiteUserName;
+            transform.position  = boardOffset;
             var center = new Vector3(size.x / 2f - 0.5f,0,-(size.y / 2f - 0.5f));
             _fieldGreen.localPosition = center + new Vector3(0,_fieldGreen.localPosition.y,0);
             _fieldGreen.localScale    = new Vector3(size.x + 1,_fieldGreen.localScale.y,size.y + 1);
