@@ -17,7 +17,14 @@ namespace OucrcReversi.Scene {
         private void Start() {
             var a = new BoardStatusPoller(OucrcNetType.Watch,9,new Vector3(-20,0,-12),"");
             var token = gameObject.GetCancellationTokenOnDestroy();
+            RefreshRoomLoop(token).Forget();
             ServerGetLoop(token).Forget();
+        }
+        private async UniTask RefreshRoomLoop(CancellationToken token) {
+            while(true) {
+                await ServerUtility.Instance.PostRefreshRoom(OucrcNetType.Watch,token);
+                await UniTask.Delay(TimeSpan.FromSeconds(3),cancellationToken: token);
+            }
         }
         private async UniTask ServerGetLoop(CancellationToken token) {
             while(true) {
@@ -26,7 +33,7 @@ namespace OucrcReversi.Scene {
                 GetAITask(OucrcNetType.Battle,token).Forget();
                 GetRoomTask(OucrcNetType.Watch,token).Forget();
                 GetRoomTask(OucrcNetType.Battle,token).Forget();
-                await UniTask.Yield();
+                await UniTask.Yield(token);
             }
         }
         private async UniTask GetUserTask(OucrcNetType oucrcNetType,CancellationToken token) {
