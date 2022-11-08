@@ -11,7 +11,6 @@ namespace OucrcReversi.Network {
         private string _battleUrl;
         private string _watchUrl;
         public const float WatchInterval = 0.1f;
-        private const int c_timeOutTime = 1;
         protected override void Instanced() { }
         public void SetUrl(OucrcNetType netType,string url) {
             switch(netType) {

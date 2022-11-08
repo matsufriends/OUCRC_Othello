@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using OucrcReversi.Network;
 using UniRx;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 namespace OucrcReversi.Scene {
@@ -23,11 +22,11 @@ namespace OucrcReversi.Scene {
         [SerializeField] private Transform _watchUserParent;
         [SerializeField] private Transform _battleUserParent;
         [SerializeField] private Transform _aiIdParent;
-        public IObservable<Unit> OnOpen => _barToggleButton.OnClickAsObservable();
-        private readonly HashSet<string> _watchUserHash = new();
-        private readonly HashSet<string> _battleUserHash = new();
         private readonly HashSet<string> _aiIdHash = new();
+        private readonly HashSet<string> _battleUserHash = new();
+        private readonly HashSet<string> _watchUserHash = new();
         private bool _isActive;
+        public IObservable<Unit> OnOpen => _barToggleButton.OnClickAsObservable();
         private void Awake() {
             _downBar.OnOpen.Subscribe(
                 _ => {
@@ -35,7 +34,6 @@ namespace OucrcReversi.Scene {
                     Anim();
                 }
             );
-            NativeLeakDetection.Mode = NativeLeakDetectionMode.Disabled;
             _barToggleButton.OnClickAsObservable().Subscribe(
                 _ => {
                     _isActive = !_isActive;

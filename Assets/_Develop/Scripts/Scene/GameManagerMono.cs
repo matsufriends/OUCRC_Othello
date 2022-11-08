@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using MornLib.Singletons;
@@ -7,25 +8,18 @@ using UniRx;
 using UnityEngine;
 namespace OucrcReversi.Scene {
     public class GameManagerMono : SingletonMono<GameManagerMono> {
-        private readonly Subject<(OucrcNetType,UserInfo[])> _getAllUserSubject = new();
         private readonly Subject<(OucrcNetType,UserInfo[])> _getAllAISubject = new();
         private readonly Subject<(OucrcNetType,RoomIdUsersAndBoard[])> _getAllRoomSubject = new();
+        private readonly Subject<(OucrcNetType,UserInfo[])> _getAllUserSubject = new();
         public IObservable<(OucrcNetType,UserInfo[])> OnGetAllUser => _getAllUserSubject;
         public IObservable<(OucrcNetType,UserInfo[])> OnGetAllAI => _getAllAISubject;
         public IObservable<(OucrcNetType,RoomIdUsersAndBoard[])> OnGetAllRoom => _getAllRoomSubject;
-        protected override void MyAwake() { }
         private void Start() {
             var a = new BoardStatusPoller(OucrcNetType.Watch,9,new Vector3(-20,0,-12),"");
             var token = gameObject.GetCancellationTokenOnDestroy();
-            RefreshRoomLoop(token).Forget();
             ServerGetLoop(token).Forget();
         }
-        private async UniTask RefreshRoomLoop(CancellationToken token) {
-            while(true) {
-                await ServerUtility.Instance.PostRefreshRoom(OucrcNetType.Watch,token);
-                await UniTask.Delay(TimeSpan.FromSeconds(3),cancellationToken: token);
-            }
-        }
+        protected override void MyAwake() { }
         private async UniTask ServerGetLoop(CancellationToken token) {
             while(true) {
                 GetUserTask(OucrcNetType.Watch,token).Forget();
@@ -33,12 +27,15 @@ namespace OucrcReversi.Scene {
                 GetAITask(OucrcNetType.Battle,token).Forget();
                 GetRoomTask(OucrcNetType.Watch,token).Forget();
                 GetRoomTask(OucrcNetType.Battle,token).Forget();
-                await UniTask.Yield(token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: token);
             }
         }
         private async UniTask GetUserTask(OucrcNetType oucrcNetType,CancellationToken token) {
             var users = await ServerUtility.Instance.GetAllUsers(oucrcNetType,false,token);
-            if(users != null) _getAllUserSubject.OnNext((oucrcNetType,users));
+            if(users != null) {
+                _getAllUserSubject.OnNext((oucrcNetType,users));
+                if(users.All(x => x.status == null)) ServerUtility.Instance.PostRefreshRoom(oucrcNetType,token).Forget();
+            }
         }
         private async UniTask GetAITask(OucrcNetType oucrcNetType,CancellationToken token) {
             var ais = await ServerUtility.Instance.GetAllUsers(oucrcNetType,true,token);

@@ -12,12 +12,12 @@ using UniRx;
 using UnityEngine;
 namespace OucrcReversi.AI {
     public sealed class RandomPutAI : IDisposable {
-        private readonly string _userId;
         private readonly OucrcNetType _oucrcNetType;
-        private readonly CancellationTokenSource _tokenSource = new();
         private readonly List<Vector2Int> _placeablePosList = new();
-        private UserInfo _userInfo;
+        private readonly CancellationTokenSource _tokenSource = new();
+        private readonly string _userId;
         private RoomIdUsersAndBoard _room;
+        private UserInfo _userInfo;
         public RandomPutAI(string userId,OucrcNetType oucrcNetType) {
             _userId       = userId;
             _oucrcNetType = oucrcNetType;
@@ -60,7 +60,7 @@ namespace OucrcReversi.AI {
                         );
                     }
                 }
-                await UniTask.Yield(_tokenSource.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ServerUtility.WatchInterval),cancellationToken: _tokenSource.Token);
             }
         }
     }
