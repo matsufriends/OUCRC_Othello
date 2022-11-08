@@ -18,6 +18,10 @@ namespace OucrcReversi.Network {
         public int GetCellCount() {
             return board.Sum(row => row.Count(color => color is 1 or 2));
         }
+        public int GetCellCount(CellColor color) {
+            var id = color == CellColor.Black ? 1 : 2;
+            return board.Sum(row => row.Count(color => color == id));
+        }
         public CellColor[,] GetGrid() {
             var size = BoardSize;
             var grid = new CellColor[size.x,size.y];
