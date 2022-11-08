@@ -6,16 +6,18 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace OucrcReversi.Scene {
     public class RandomAIField : MonoBehaviour {
+        [SerializeField] private RandomAIDeleteItemMono _randomDeleteButton;
+        [SerializeField] private Transform _randomAiParent;
         [SerializeField] private OucrcNetType _oucrcNetType;
         [SerializeField] private TMP_InputField _inputField;
         [SerializeField] private Button _generateButton;
-        private RandomPutAI _randomPutAI;
         private void Awake() {
             _inputField.onValueChanged.AsObservable().Subscribe(_ => UpdateButton()).AddTo(this);
             _generateButton.OnClickAsObservable().Subscribe(
                 _ => {
-                    _randomPutAI?.Dispose();
-                    _randomPutAI = new RandomPutAI(_inputField.text,_oucrcNetType);
+                    var randomPutAI = new RandomPutAI(_inputField.text,_oucrcNetType);
+                    var delete = Instantiate(_randomDeleteButton,_randomAiParent);
+                    delete.Init(_inputField.text,randomPutAI);
                     _generateButton.gameObject.SetActive(false);
                 }
             ).AddTo(this);
